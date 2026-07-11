@@ -25,9 +25,11 @@
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://21kelime.com" />
-	<meta property="og:image" content="https://21kelime.com/icon-512.png" />
+	<meta property="og:image" content="https://21kelime.com/og.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
 	<meta property="og:locale" content="tr_TR" />
-	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <div class="app">
@@ -62,6 +64,10 @@
 
 	<footer>
 		<span>Her gece yarısı yeni bulmaca (TSİ)</span>
+		<nav class="legal-links">
+			<a href={resolve('/gizlilik')}>Gizlilik</a>
+			<a href={resolve('/kullanim-kosullari')}>Koşullar</a>
+		</nav>
 	</footer>
 </div>
 
@@ -133,9 +139,26 @@
 	}
 
 	footer {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
 		padding: 1rem 0 1.4rem;
 		text-align: center;
 		font-size: 0.78rem;
 		color: var(--ink-soft);
+	}
+
+	.legal-links {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	.legal-links a {
+		color: var(--ink-soft);
+	}
+
+	.legal-links a:hover {
+		color: var(--accent);
 	}
 </style>

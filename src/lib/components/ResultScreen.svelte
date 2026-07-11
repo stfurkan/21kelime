@@ -2,20 +2,35 @@
 	import { resolve } from '$app/paths';
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { shareText, share, scoreOf } from '$lib/game/share';
+	import { shareResultImage } from '$lib/game/resultImage';
+	import { loadStats } from '$lib/game/storage';
 	import { msUntilNextPuzzle } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
 	import Icon from './Icon.svelte';
+	import BrandIcon from './BrandIcon.svelte';
 
 	let { engine, onNewPractice }: { engine: GameEngine; onNewPractice?: () => void } = $props();
-
-	const text = $derived(shareText(engine.puzzle.day, engine.results, engine.relax));
-	const encoded = $derived(encodeURIComponent(text));
 
 	const score = $derived(scoreOf(engine.results));
 	const isDaily = $derived(engine.mode === 'daily');
 	const isPractice = $derived(engine.mode === 'practice');
 
-	let shareState = $state<'idle' | 'copied' | 'shared'>('idle');
+	const streak = $derived(isDaily ? loadStats().currentStreak : 0);
+	const text = $derived(shareText(engine.puzzle.day, engine.results, engine.relax, streak));
+	const encoded = $derived(encodeURIComponent(text));
+
+	const dateLabel = $derived(
+		isPractice
+			? 'antrenman'
+			: new Intl.DateTimeFormat('tr-TR', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric',
+					timeZone: 'UTC'
+				}).format(new Date(`${engine.puzzle.date}T00:00:00Z`))
+	);
+
+	let shareState = $state<'idle' | 'copied' | 'shared' | 'image-downloaded'>('idle');
 	let countdown = $state('');
 
 	$effect(() => {
@@ -52,6 +67,22 @@
 		}
 	}
 
+	// Instagram has no web share URL; the path in is a story-ready image
+	// through the OS share sheet (mobile) or a download (desktop).
+	async function doImageShare() {
+		const outcome = await shareResultImage({
+			day: engine.puzzle.day,
+			dateLabel,
+			results: engine.results,
+			relax: engine.relax,
+			streak
+		});
+		if (outcome === 'downloaded') {
+			shareState = 'image-downloaded';
+			setTimeout(() => (shareState = 'idle'), 3200);
+		}
+	}
+
 	const verdict = $derived(
 		score === 21
 			? 'Kusursuz!'
@@ -85,24 +116,63 @@
 		</button>
 		<div class="social" aria-label="Sosyal medyada paylaş">
 			<a
-				class="social-btn"
+				class="brand"
 				href="https://wa.me/?text={encoded}"
 				target="_blank"
-				rel="noopener noreferrer">WhatsApp</a
+				rel="noopener noreferrer"
+				aria-label="WhatsApp'ta paylaş"
+				title="WhatsApp"><BrandIcon name="whatsapp" /></a
 			>
 			<a
-				class="social-btn"
+				class="brand"
+				href="https://www.instagram.com"
+				onclick={(e) => {
+					e.preventDefault();
+					doImageShare();
+				}}
+				aria-label="Instagram için görsel oluştur"
+				title="Instagram (görsel oluşturur)"><BrandIcon name="instagram" /></a
+			>
+			<a
+				class="brand"
 				href="https://x.com/intent/post?text={encoded}"
 				target="_blank"
-				rel="noopener noreferrer">X</a
+				rel="noopener noreferrer"
+				aria-label="X'te paylaş"
+				title="X"><BrandIcon name="x" /></a
 			>
 			<a
-				class="social-btn"
+				class="brand"
+				href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F21kelime.com&quote={encoded}"
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="Facebook'ta paylaş"
+				title="Facebook"><BrandIcon name="facebook" /></a
+			>
+			<a
+				class="brand"
+				href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2F21kelime.com"
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="LinkedIn'de paylaş"
+				title="LinkedIn"><BrandIcon name="linkedin" /></a
+			>
+			<a
+				class="brand"
 				href="https://t.me/share/url?url=https%3A%2F%2F21kelime.com&text={encoded}"
 				target="_blank"
-				rel="noopener noreferrer">Telegram</a
+				rel="noopener noreferrer"
+				aria-label="Telegram'da paylaş"
+				title="Telegram"><BrandIcon name="telegram" /></a
 			>
-			<button class="social-btn" onclick={doCopy}>Kopyala</button>
+		</div>
+		<div class="pills">
+			<button class="social-btn" onclick={doCopy}>
+				{shareState === 'copied' ? 'Kopyalandı' : 'Metni kopyala'}
+			</button>
+			<button class="social-btn" onclick={doImageShare}>
+				{shareState === 'image-downloaded' ? 'Görsel indirildi' : 'Görsel oluştur'}
+			</button>
 		</div>
 	{/if}
 
@@ -209,6 +279,29 @@
 	}
 
 	.social {
+		display: flex;
+		gap: 0.55rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.brand {
+		display: grid;
+		place-items: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 50%;
+		color: var(--ink-soft);
+		border: 1px solid var(--line);
+		background: var(--bg-raised);
+	}
+
+	.brand:hover {
+		color: var(--accent);
+		border-color: var(--accent);
+	}
+
+	.pills {
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;

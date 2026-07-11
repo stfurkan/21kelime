@@ -143,7 +143,7 @@
 	{:else if engine.phase === 'playing'}
 		<RoundBoard {engine} />
 	{:else if engine.phase === 'between'}
-		<div class="between {engine.lastOutcome}">
+		<div class="between {engine.lastOutcome}" role="status" aria-live="polite">
 			{#if engine.lastOutcome === 'failed'}
 				<p class="between-title">Süre doldu!</p>
 				<p class="between-word bad-word">{trUpper(engine.round.canonical)}</p>

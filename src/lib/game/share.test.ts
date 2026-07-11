@@ -11,18 +11,28 @@ function results(outcomes: string): RoundResult[] {
 }
 
 describe('shareText', () => {
-	it('renders 3 rows of 7 with the right emoji', () => {
+	it('groups rows by word length with a length label', () => {
 		const text = shareText(5, results('gggggggyyyyyyybbbbbbb'), false);
 		const lines = text.split('\n');
 		expect(lines[0]).toBe('21kelime #5 14/21');
-		expect(lines[1]).toBe('🟩🟩🟩🟩🟩🟩🟩');
-		expect(lines[2]).toBe('🟨🟨🟨🟨🟨🟨🟨');
-		expect(lines[3]).toBe('⬛⬛⬛⬛⬛⬛⬛');
-		expect(lines[4]).toBe('https://21kelime.com');
+		expect(lines[1]).toBe('🟩🟩🟩 4');
+		expect(lines[2]).toBe('🟩🟩🟩🟩 5');
+		expect(lines[3]).toBe('🟨🟨🟨🟨 6');
+		expect(lines[4]).toBe('🟨🟨🟨⬛ 7');
+		expect(lines[5]).toBe('⬛⬛⬛ 8');
+		expect(lines[6]).toBe('⬛⬛⬛ 9');
+		expect(lines[7]).toBe('https://21kelime.com');
+		expect(lines).toHaveLength(8);
 	});
 
-	it('marks relax mode', () => {
-		expect(shareText(1, results('ggggggggggggggggggggg'), true)).toContain('21/21 🌙');
+	it('marks relax mode and includes streaks of 2 or more', () => {
+		const text = shareText(1, results('ggggggggggggggggggggg'), true, 5);
+		expect(text).toContain('21/21 🌙');
+		expect(text).toContain('Seri: 5 gün 🔥');
+	});
+
+	it('omits the streak line for streaks under 2', () => {
+		expect(shareText(1, results('ggggggggggggggggggggg'), false, 1)).not.toContain('Seri');
 	});
 });
 
