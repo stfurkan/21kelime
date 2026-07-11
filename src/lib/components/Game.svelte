@@ -1,0 +1,251 @@
+<script lang="ts">
+	import { onDestroy } from 'svelte';
+	import { GameEngine, type GameMode } from '$lib/game/engine.svelte';
+	import { fromWire } from '$lib/game/wire';
+	import { istanbulToday } from '$lib/game/daily';
+	import {
+		loadDayState,
+		saveDayState,
+		loadStats,
+		saveStats,
+		applyGameToStats
+	} from '$lib/game/storage';
+	import { dateOfDay } from '$lib/game/daily';
+	import { trUpper } from '$lib/words/normalize';
+	import type { WirePuzzle } from '$lib/game/types';
+	import RoundBoard from './RoundBoard.svelte';
+	import ResultScreen from './ResultScreen.svelte';
+
+	let {
+		wire,
+		mode,
+		onNewPractice
+	}: { wire: WirePuzzle; mode: GameMode; onNewPractice?: () => void } = $props();
+
+	// The component is recreated via {#key} when the puzzle changes, so
+	// capturing the initial prop values here is intentional.
+	// svelte-ignore state_referenced_locally
+	const puzzle = fromWire(wire);
+	// svelte-ignore state_referenced_locally
+	const persist = mode !== 'practice';
+
+	function saveProgress(done: boolean) {
+		if (!persist) return;
+		const prev = loadDayState(puzzle.date);
+		saveDayState(puzzle.date, {
+			results: engine.results,
+			revealsLeft: engine.revealsLeft,
+			relax: engine.relax,
+			done,
+			statsCounted: prev?.statsCounted ?? false
+		});
+	}
+
+	// svelte-ignore state_referenced_locally
+	const engine = new GameEngine(puzzle, mode, {
+		onRoundDone: () => saveProgress(false),
+		onFinish: () => {
+			saveProgress(true);
+			// Streaks/stats only count for today's daily puzzle, once.
+			if (mode === 'daily' && puzzle.date === istanbulToday()) {
+				const state = loadDayState(puzzle.date);
+				if (state && !state.statsCounted) {
+					const yesterday = dateOfDay(puzzle.day - 1);
+					saveStats(
+						applyGameToStats(
+							loadStats(),
+							puzzle.date,
+							yesterday,
+							engine.score,
+							puzzle.rounds.length
+						)
+					);
+					saveDayState(puzzle.date, { ...state, statsCounted: true });
+				}
+			}
+		}
+	});
+
+	onDestroy(() => engine.destroy());
+
+	// Restore any saved progress for this date (runs client-side after mount).
+	let restored = $state(false);
+	$effect(() => {
+		if (restored) return;
+		restored = true;
+		if (!persist) return;
+		const saved = loadDayState(puzzle.date);
+		if (saved && saved.results.length > 0) {
+			engine.resume(saved.results, saved.revealsLeft, saved.relax);
+		}
+	});
+
+	let relaxChoice = $state(false);
+
+	const dateLabel = $derived(
+		mode === 'practice'
+			? 'Antrenman'
+			: new Intl.DateTimeFormat('tr-TR', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric',
+					timeZone: 'UTC'
+				}).format(new Date(`${puzzle.date}T00:00:00Z`))
+	);
+
+	const resuming = $derived(engine.results.length > 0 && engine.phase === 'start');
+	const lastRound = $derived(engine.roundIndex === engine.puzzle.rounds.length - 1);
+</script>
+
+<div class="game">
+	{#if engine.phase === 'start'}
+		<div class="start">
+			{#if mode === 'practice'}
+				<h1>Antrenman</h1>
+				<p class="sub">Sınırsız pratik — istatistiklere işlenmez.</p>
+			{:else}
+				<h1>#{puzzle.day} · {dateLabel}</h1>
+				<p class="sub">21 tur, her turda tüm harflerden bir kelime.</p>
+			{/if}
+
+			{#if resuming}
+				<p class="resume-note">
+					Kaldığın yerden: <strong>{engine.results.length}/21</strong> tur oynandı
+				</p>
+				<button class="btn btn-primary big" onclick={() => engine.start(engine.relax)}>
+					Devam et
+				</button>
+			{:else}
+				<label class="relax-toggle">
+					<input type="checkbox" bind:checked={relaxChoice} />
+					<span>🌙 Rahat mod <em>(süre yok)</em></span>
+				</label>
+				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
+			{/if}
+		</div>
+	{:else if engine.phase === 'playing'}
+		<RoundBoard {engine} />
+	{:else if engine.phase === 'between'}
+		<div class="between {engine.lastOutcome}">
+			{#if engine.lastOutcome === 'failed'}
+				<p class="between-title">Süre doldu!</p>
+				<p class="between-word bad-word">{trUpper(engine.round.canonical)}</p>
+				{#if engine.round.answers.length > 1}
+					<p class="between-alts">
+						diğer cevaplar: {engine.round.answers
+							.filter((a) => a !== engine.round.canonical)
+							.map(trUpper)
+							.join(', ')}
+					</p>
+				{/if}
+			{:else}
+				<p class="between-title">
+					{engine.lastOutcome === 'revealed' ? 'İpucuyla çözdün 💡' : 'Doğru! ✓'}
+				</p>
+				<p class="between-word good-word">{trUpper(engine.results.at(-1)?.word ?? '')}</p>
+			{/if}
+			<button class="btn" onclick={() => engine.advance()}>
+				{lastRound ? 'Sonuçlar →' : 'Devam →'}
+			</button>
+		</div>
+	{:else}
+		<ResultScreen {engine} {onNewPractice} />
+	{/if}
+</div>
+
+<style>
+	.game {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		padding-top: 0.6rem;
+	}
+
+	.start {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		text-align: center;
+		padding-top: 2.2rem;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 1.45rem;
+		letter-spacing: -0.01em;
+	}
+
+	.sub {
+		margin: 0;
+		color: var(--ink-soft);
+	}
+
+	.relax-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--ink-soft);
+	}
+
+	.relax-toggle input {
+		accent-color: var(--accent);
+		width: 1.1rem;
+		height: 1.1rem;
+	}
+
+	.relax-toggle em {
+		font-style: normal;
+		font-weight: 400;
+		font-size: 0.85rem;
+	}
+
+	.big {
+		font-size: 1.15rem;
+		padding: 0.85rem 2.6rem;
+	}
+
+	.resume-note {
+		margin: 0;
+		color: var(--ink-soft);
+	}
+
+	.between {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.7rem;
+		text-align: center;
+		padding-top: 3rem;
+	}
+
+	.between-title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+	}
+
+	.between-word {
+		margin: 0;
+		font-size: 2.3rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+	}
+
+	.good-word {
+		color: var(--good);
+	}
+
+	.bad-word {
+		color: var(--bad);
+	}
+
+	.between-alts {
+		margin: 0;
+		color: var(--ink-soft);
+		font-size: 0.9rem;
+	}
+</style>

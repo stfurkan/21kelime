@@ -4,11 +4,11 @@
  * obfuscated answers, never the pools or future days.
  */
 import wordData from './data/words.json';
-import { buildSignatureIndex } from '$lib/words/signature.ts';
-import { generatePuzzle, toWire, ROUND_PLAN } from '$lib/game/generate.ts';
-import { dayNumberOf, istanbulToday, isValidDateString } from '$lib/game/daily.ts';
-import { hashSeed, mulberry32 } from '$lib/game/rng.ts';
-import type { WirePuzzle } from '$lib/game/types.ts';
+import { buildSignatureIndex } from '$lib/words/signature';
+import { generatePuzzle, toWire, ROUND_PLAN } from '$lib/game/generate';
+import { dayNumberOf, istanbulToday, isValidDateString } from '$lib/game/daily';
+import { hashSeed, mulberry32 } from '$lib/game/rng';
+import type { WirePuzzle } from '$lib/game/types';
 
 const pools = wordData.pools as unknown as Record<number, string[]>;
 const validationWords: string[] = wordData.validation;

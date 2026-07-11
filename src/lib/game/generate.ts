@@ -27,7 +27,11 @@ const COUNT_BY_LEN: ReadonlyMap<number, number> = (() => {
  * Scramble a word's letters deterministically, avoiding arrangements that
  * already spell a valid answer (no freebies on screen).
  */
-export function scrambleWord(word: string, seedKey: string, forbidden: ReadonlySet<string>): string[] {
+export function scrambleWord(
+	word: string,
+	seedKey: string,
+	forbidden: ReadonlySet<string>
+): string[] {
 	const rand = mulberry32(hashSeed(`21kelime:scramble:${seedKey}`));
 	const letters = [...word];
 	for (let attempt = 0; attempt < 20; attempt++) {
