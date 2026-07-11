@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>Antrenman — 21kelime</title>
+	<title>Antrenman | 21kelime</title>
 </svelte:head>
 
 {#if failed}

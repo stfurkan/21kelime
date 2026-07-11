@@ -1,4 +1,6 @@
-/* 21kelime design tokens & base styles */
+/* 21kelime design tokens & base styles.
+   Theme resolution: explicit user choice via data-theme on <html>
+   (set pre-paint in app.html) wins; otherwise system preference. */
 :root {
 	--bg: #faf7f2;
 	--bg-raised: #ffffff;
@@ -18,11 +20,32 @@
 	--tile-ink: #1c1917;
 	--shadow: 0 1px 2px rgb(28 25 23 / 0.06), 0 4px 12px rgb(28 25 23 / 0.06);
 	--radius: 14px;
-	color-scheme: light dark;
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	--bg: #14110e;
+	--bg-raised: #1e1a16;
+	--ink: #f3ede4;
+	--ink-soft: #a89f93;
+	--line: #35302a;
+	--accent: #2dd4bf;
+	--accent-ink: #062622;
+	--accent-soft: #133b36;
+	--good: #4ade80;
+	--good-soft: #14301d;
+	--warn: #fbbf24;
+	--warn-soft: #382a10;
+	--bad: #f87171;
+	--bad-soft: #3d1414;
+	--tile-bg: #262019;
+	--tile-ink: #f3ede4;
+	--shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 14px rgb(0 0 0 / 0.35);
+	color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
+	:root:not([data-theme='light']) {
 		--bg: #14110e;
 		--bg-raised: #1e1a16;
 		--ink: #f3ede4;
@@ -40,6 +63,7 @@
 		--tile-bg: #262019;
 		--tile-ink: #f3ede4;
 		--shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 14px rgb(0 0 0 / 0.35);
+		color-scheme: dark;
 	}
 }
 

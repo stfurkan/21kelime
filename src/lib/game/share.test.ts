@@ -14,7 +14,7 @@ describe('shareText', () => {
 	it('renders 3 rows of 7 with the right emoji', () => {
 		const text = shareText(5, results('gggggggyyyyyyybbbbbbb'), false);
 		const lines = text.split('\n');
-		expect(lines[0]).toBe('21kelime #5 — 14/21');
+		expect(lines[0]).toBe('21kelime #5 14/21');
 		expect(lines[1]).toBe('🟩🟩🟩🟩🟩🟩🟩');
 		expect(lines[2]).toBe('🟨🟨🟨🟨🟨🟨🟨');
 		expect(lines[3]).toBe('⬛⬛⬛⬛⬛⬛⬛');

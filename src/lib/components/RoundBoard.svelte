@@ -2,6 +2,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { SECONDS_PER_ROUND } from '$lib/game/generate';
 	import { trUpper } from '$lib/words/normalize';
+	import Icon from './Icon.svelte';
 
 	let { engine }: { engine: GameEngine } = $props();
 
@@ -31,11 +32,17 @@
 
 	function onKeydown(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
-		if (e.key === 'Backspace') {
+		if (e.key === 'Backspace' || e.key === 'Delete') {
 			engine.backspace();
 			e.preventDefault();
 		} else if (e.key === ' ') {
 			engine.shuffleRack();
+			e.preventDefault();
+		} else if (e.key === 'Enter') {
+			engine.submit();
+			e.preventDefault();
+		} else if (e.key === 'Escape') {
+			engine.togglePause();
 			e.preventDefault();
 		} else if (e.key.length === 1) {
 			engine.typeLetter(e.key);
@@ -55,20 +62,26 @@
 				class="chip"
 				onclick={() => engine.reveal()}
 				disabled={engine.revealsLeft <= 0 || engine.revealedCount >= engine.wordLength - 1}
-				title="İpucu: sıradaki harfi aç"
+				title="İpucu: sıradaki harfi açar"
 			>
-				💡 İpucu <strong>×{engine.revealsLeft}</strong>
+				<Icon name="bulb" size={17} /> İpucu <strong>{engine.revealsLeft}</strong>
 			</button>
-			<button class="chip" onclick={() => engine.shuffleRack()} title="Harfleri karıştır (boşluk)"
-				>🔀</button
+			<button
+				class="chip icon-chip"
+				onclick={() => engine.shuffleRack()}
+				title="Harfleri karıştır (boşluk tuşu)"
+				aria-label="Harfleri karıştır"
 			>
+				<Icon name="shuffle" size={17} />
+			</button>
 			{#if !engine.relax}
 				<button
-					class="chip"
+					class="chip icon-chip"
 					onclick={() => engine.togglePause()}
-					title={engine.paused ? 'Devam et' : 'Duraklat'}
+					title={engine.paused ? 'Devam et' : 'Duraklat (Esc)'}
+					aria-label={engine.paused ? 'Devam et' : 'Duraklat'}
 				>
-					{engine.paused ? '▶' : '⏸'}
+					<Icon name={engine.paused ? 'play' : 'pause'} size={17} />
 				</button>
 			{/if}
 		</div>
@@ -79,24 +92,24 @@
 			<div class="timer-fill {timerClass}" style="width: {timerPct}%"></div>
 		</div>
 	{:else}
-		<div class="relax-tag">🌙 rahat mod</div>
+		<div class="relax-tag"><Icon name="moon" size={14} /> rahat mod</div>
 	{/if}
 
 	{#if engine.paused}
 		<div class="paused">
-			<p>Oyun duraklatıldı</p>
+			<p>Oyun duraklatıldı, harfler gizlendi.</p>
 			<button class="btn btn-primary" onclick={() => engine.togglePause()}>Devam et</button>
 		</div>
 	{:else}
 		{#key engine.wrongShake}
-			<div class="slots" class:shake={engine.wrongShake > 0}>
+			<div class="slots" class:shake={engine.wrongShake > 0} style="--n: {engine.wordLength}">
 				{#each slots as slot, i (i)}
 					<div class="slot {slot.kind}">{slot.letter ? trUpper(slot.letter) : ''}</div>
 				{/each}
 			</div>
 		{/key}
 
-		<div class="rack">
+		<div class="rack" style="--n: {engine.tiles.length}">
 			{#each engine.tiles as tile, i (i)}
 				<button
 					class="tile"
@@ -115,7 +128,7 @@
 			onclick={() => engine.backspace()}
 			disabled={engine.inputTileIndices.length === 0}
 		>
-			⌫ Sil
+			<Icon name="backspace" size={17} /> Sil
 		</button>
 	{/if}
 </div>
@@ -149,11 +162,18 @@
 	}
 
 	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		border: 1px solid var(--line);
 		background: var(--bg-raised);
 		border-radius: 999px;
 		padding: 0.35rem 0.75rem;
 		font-size: 0.88rem;
+	}
+
+	.icon-chip {
+		padding: 0.35rem 0.6rem;
 	}
 
 	.chip:disabled {
@@ -184,6 +204,9 @@
 	}
 
 	.relax-tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
 		font-size: 0.82rem;
 		color: var(--ink-soft);
 	}
@@ -193,21 +216,23 @@
 		padding: 3rem 0;
 	}
 
+	/* Slots and rack always stay on one row; sizes derive from letter count. */
 	.slots {
 		display: flex;
+		flex-wrap: nowrap;
 		justify-content: center;
-		gap: 0.4rem;
-		min-height: 3.4rem;
+		gap: 0.3rem;
+		min-height: 3.2rem;
 		margin-top: 0.6rem;
 	}
 
 	.slot {
-		width: clamp(2.2rem, 9vw, 3.1rem);
-		height: clamp(2.7rem, 11vw, 3.6rem);
+		width: min(3.1rem, calc((100% - (var(--n) - 1) * 0.3rem) / var(--n)));
+		aspect-ratio: 0.86;
 		border-bottom: 3px solid var(--line);
 		display: grid;
 		place-items: center;
-		font-size: clamp(1.3rem, 5.5vw, 1.7rem);
+		font-size: min(1.6rem, calc(40vw / var(--n)));
 		font-weight: 800;
 	}
 
@@ -221,7 +246,7 @@
 	}
 
 	.shake {
-		animation: shake 0.4s;
+		animation: shake 0.35s;
 	}
 
 	@keyframes shake {
@@ -245,21 +270,21 @@
 
 	.rack {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		justify-content: center;
-		gap: 0.5rem;
+		gap: 0.4rem;
 		margin-top: 1.2rem;
 	}
 
 	.tile {
-		width: clamp(2.9rem, 12vw, 3.6rem);
-		height: clamp(2.9rem, 12vw, 3.6rem);
+		width: min(3.6rem, calc((100% - (var(--n) - 1) * 0.4rem) / var(--n)));
+		aspect-ratio: 1;
 		border-radius: 12px;
 		background: var(--tile-bg);
 		color: var(--tile-ink);
 		border: 1px solid var(--line);
 		box-shadow: var(--shadow);
-		font-size: clamp(1.35rem, 5.5vw, 1.7rem);
+		font-size: min(1.7rem, calc(44vw / var(--n)));
 		font-weight: 800;
 		transition:
 			transform 0.08s ease,
@@ -281,6 +306,9 @@
 	}
 
 	.erase {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		align-self: center;
 		margin-top: 0.4rem;
 		color: var(--ink-soft);

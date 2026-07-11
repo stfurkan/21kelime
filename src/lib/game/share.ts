@@ -23,7 +23,7 @@ export function shareText(day: number, results: RoundResult[], relax: boolean): 
 		);
 	}
 	const mode = relax ? ' 🌙' : '';
-	return `21kelime #${day} — ${score}/${results.length}${mode}\n${grid.join('\n')}\nhttps://21kelime.com`;
+	return `21kelime #${day} ${score}/${results.length}${mode}\n${grid.join('\n')}\nhttps://21kelime.com`;
 }
 
 export async function share(text: string): Promise<'shared' | 'copied' | 'failed'> {

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>#{data.wire.day} — 21kelime arşiv</title>
+	<title>#{data.wire.day} | 21kelime arşiv</title>
 </svelte:head>
 
 {#key data.wire.date}

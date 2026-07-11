@@ -4,8 +4,12 @@
 	import { shareText, share, scoreOf } from '$lib/game/share';
 	import { msUntilNextPuzzle } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
+	import Icon from './Icon.svelte';
 
 	let { engine, onNewPractice }: { engine: GameEngine; onNewPractice?: () => void } = $props();
+
+	const text = $derived(shareText(engine.puzzle.day, engine.results, engine.relax));
+	const encoded = $derived(encodeURIComponent(text));
 
 	const score = $derived(scoreOf(engine.results));
 	const isDaily = $derived(engine.mode === 'daily');
@@ -29,7 +33,7 @@
 	});
 
 	async function doShare() {
-		const result = await share(shareText(engine.puzzle.day, engine.results, engine.relax));
+		const result = await share(text);
 		if (result === 'copied') {
 			shareState = 'copied';
 			setTimeout(() => (shareState = 'idle'), 2200);
@@ -38,16 +42,26 @@
 		}
 	}
 
+	async function doCopy() {
+		try {
+			await navigator.clipboard.writeText(text);
+			shareState = 'copied';
+			setTimeout(() => (shareState = 'idle'), 2200);
+		} catch {
+			// Clipboard blocked: the native share button still works.
+		}
+	}
+
 	const verdict = $derived(
 		score === 21
-			? 'Kusursuz! 🏆'
+			? 'Kusursuz!'
 			: score >= 17
-				? 'Harika! 🎉'
+				? 'Harika!'
 				: score >= 12
-					? 'Güzel oyun! 👏'
+					? 'Güzel oyun!'
 					: score >= 7
-						? 'Fena değil 💪'
-						: 'Yarın yeni şans 🌱'
+						? 'Fena değil'
+						: 'Yarın yeni şans'
 	);
 </script>
 
@@ -63,8 +77,33 @@
 
 	{#if !isPractice}
 		<button class="btn btn-primary sharebtn" onclick={doShare}>
-			{shareState === 'copied' ? 'Kopyalandı ✓' : 'Sonucu paylaş'}
+			{#if shareState === 'copied'}
+				<Icon name="check" size={17} /> Kopyalandı
+			{:else}
+				<Icon name="share" size={17} /> Sonucu paylaş
+			{/if}
 		</button>
+		<div class="social" aria-label="Sosyal medyada paylaş">
+			<a
+				class="social-btn"
+				href="https://wa.me/?text={encoded}"
+				target="_blank"
+				rel="noopener noreferrer">WhatsApp</a
+			>
+			<a
+				class="social-btn"
+				href="https://x.com/intent/post?text={encoded}"
+				target="_blank"
+				rel="noopener noreferrer">X</a
+			>
+			<a
+				class="social-btn"
+				href="https://t.me/share/url?url=https%3A%2F%2F21kelime.com&text={encoded}"
+				target="_blank"
+				rel="noopener noreferrer">Telegram</a
+			>
+			<button class="social-btn" onclick={doCopy}>Kopyala</button>
+		</div>
 	{/if}
 
 	{#if isDaily}
@@ -77,7 +116,9 @@
 			{#each engine.puzzle.rounds as round, i (i)}
 				{@const r = engine.results[i]}
 				<li>
-					<span class="mark {r.outcome}">{r.outcome === 'failed' ? '✗' : '✓'}</span>
+					<span class="mark {r.outcome}">
+						<Icon name={r.outcome === 'failed' ? 'cross' : 'check'} size={14} />
+					</span>
 					<a
 						href="https://sozluk.gov.tr/?ara={round.canonical}"
 						target="_blank"
@@ -167,6 +208,28 @@
 		min-width: 12rem;
 	}
 
+	.social {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.social-btn {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--ink-soft);
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		padding: 0.35rem 0.9rem;
+		background: var(--bg-raised);
+	}
+
+	.social-btn:hover {
+		color: var(--accent);
+		border-color: var(--accent);
+	}
+
 	.next {
 		margin: 0;
 		color: var(--ink-soft);
@@ -201,7 +264,8 @@
 	}
 
 	.mark {
-		font-weight: 800;
+		display: inline-flex;
+		vertical-align: middle;
 		margin-right: 0.3rem;
 	}
 

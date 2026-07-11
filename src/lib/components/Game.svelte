@@ -15,6 +15,7 @@
 	import type { WirePuzzle } from '$lib/game/types';
 	import RoundBoard from './RoundBoard.svelte';
 	import ResultScreen from './ResultScreen.svelte';
+	import Icon from './Icon.svelte';
 
 	let {
 		wire,
@@ -102,7 +103,7 @@
 		<div class="start">
 			{#if mode === 'practice'}
 				<h1>Antrenman</h1>
-				<p class="sub">Sınırsız pratik — istatistiklere işlenmez.</p>
+				<p class="sub">Sınırsız pratik. İstatistiklere işlenmez.</p>
 			{:else}
 				<h1>#{puzzle.day} · {dateLabel}</h1>
 				<p class="sub">21 tur, her turda tüm harflerden bir kelime.</p>
@@ -118,7 +119,7 @@
 			{:else}
 				<label class="relax-toggle">
 					<input type="checkbox" bind:checked={relaxChoice} />
-					<span>🌙 Rahat mod <em>(süre yok)</em></span>
+					<span><Icon name="moon" size={15} /> Rahat mod <em>(süre yok)</em></span>
 				</label>
 				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
 			{/if}
@@ -139,13 +140,15 @@
 					</p>
 				{/if}
 			{:else}
-				<p class="between-title">
-					{engine.lastOutcome === 'revealed' ? 'İpucuyla çözdün 💡' : 'Doğru! ✓'}
+				<p class="between-title good-title">
+					<Icon name="check" size={18} />
+					{engine.lastOutcome === 'revealed' ? 'İpucuyla çözdün' : 'Doğru!'}
 				</p>
 				<p class="between-word good-word">{trUpper(engine.results.at(-1)?.word ?? '')}</p>
 			{/if}
 			<button class="btn" onclick={() => engine.advance()}>
-				{lastRound ? 'Sonuçlar →' : 'Devam →'}
+				{lastRound ? 'Sonuçlar' : 'Devam'}
+				<Icon name="arrow-right" size={16} />
 			</button>
 		</div>
 	{:else}
@@ -203,6 +206,12 @@
 		font-size: 0.85rem;
 	}
 
+	.relax-toggle span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
 	.big {
 		font-size: 1.15rem;
 		padding: 0.85rem 2.6rem;
@@ -226,6 +235,14 @@
 		margin: 0;
 		font-size: 1.1rem;
 		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+	}
+
+	.good-title {
+		color: var(--good);
 	}
 
 	.between-word {

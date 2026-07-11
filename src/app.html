@@ -6,6 +6,15 @@
 		<meta name="theme-color" content="#0f766e" />
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<script>
+			// Apply the saved theme before first paint to avoid a flash.
+			try {
+				var t = localStorage.getItem('21kelime:theme');
+				if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+			} catch (e) {
+				/* storage blocked: fall back to system preference */
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

@@ -41,7 +41,7 @@ console.log('PASS: resumed at final round 21');
 
 // Solve the last round (9 letters) via keyboard.
 for (const ch of puzzle.rounds[20].canonical) await page.keyboard.type(ch);
-await page.getByText('Sonuçlar →').click();
+await page.getByText('Sonuçlar').click();
 await page.getByText('18/21', { exact: false }).first().waitFor({ timeout: 4000 });
 console.log('PASS: result screen shows 18/21');
 await page.screenshot({ path: `${SCRATCH}/result.png`, fullPage: true });

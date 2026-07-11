@@ -38,7 +38,7 @@
 </script>
 
 <svelte:head>
-	<title>Arşiv — 21kelime</title>
+	<title>Arşiv | 21kelime</title>
 </svelte:head>
 
 <h1>Arşiv</h1>

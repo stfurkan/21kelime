@@ -9,9 +9,9 @@ import type { Puzzle, Round, RoundOutcome, RoundResult } from './types.ts';
 export type GamePhase = 'start' | 'playing' | 'between' | 'done';
 export type GameMode = 'daily' | 'archive' | 'practice';
 
-const WRONG_CLEAR_MS = 450;
-const BETWEEN_SOLVED_MS = 1300;
-const BETWEEN_FAILED_MS = 2800;
+const WRONG_CLEAR_MS = 350;
+const BETWEEN_SOLVED_MS = 1000;
+const BETWEEN_FAILED_MS = 2600;
 const TICK_MS = 100;
 
 export interface TileState {
@@ -123,6 +123,7 @@ export class GameEngine {
 	/** Tap a specific rack tile. */
 	pickTile(index: number): void {
 		if (this.phase !== 'playing' || this.paused) return;
+		this.flushPendingWrong();
 		const tile = this.tiles[index];
 		if (!tile || tile.used) return;
 		if (this.currentWord.length >= this.wordLength) return;
@@ -141,8 +142,25 @@ export class GameEngine {
 
 	backspace(): void {
 		if (this.phase !== 'playing' || this.paused) return;
+		this.flushPendingWrong();
 		const last = this.inputTileIndices.pop();
 		if (last !== undefined) this.tiles[last].used = false;
+	}
+
+	/**
+	 * If a wrong guess is waiting for its delayed clear, run the clear now so
+	 * the very next tap/keystroke acts on an empty word instead of being
+	 * swallowed by a full board.
+	 */
+	private flushPendingWrong(): void {
+		if (this.wrongHandle) {
+			clearTimeout(this.wrongHandle);
+			this.wrongHandle = null;
+			while (this.inputTileIndices.length > 0) {
+				const last = this.inputTileIndices.pop();
+				if (last !== undefined) this.tiles[last].used = false;
+			}
+		}
 	}
 
 	clearInput(): void {
@@ -150,7 +168,8 @@ export class GameEngine {
 	}
 
 	shuffleRack(): void {
-		if (this.phase !== 'playing') return;
+		if (this.phase !== 'playing' || this.paused) return;
+		this.flushPendingWrong();
 		// Only shuffle presentation order; used flags travel with their tiles.
 		for (let i = this.tiles.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
@@ -182,6 +201,7 @@ export class GameEngine {
 	/** Spend one reveal: lock the next letter of the canonical answer. */
 	reveal(): void {
 		if (this.phase !== 'playing' || this.paused) return;
+		this.flushPendingWrong();
 		if (this.revealsLeft <= 0) return;
 		if (this.revealedCount >= this.wordLength - 1) return; // never auto-complete
 		this.revealsLeft -= 1;

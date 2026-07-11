@@ -28,7 +28,7 @@ for (const ch of puzzle.rounds[0].canonical) {
 		.first()
 		.click();
 }
-await page.getByText('Doğru! ✓').waitFor({ timeout: 3000 });
+await page.getByText('Doğru!').waitFor({ timeout: 3000 });
 console.log('PASS: round 1 solved by tile clicks');
 await page.screenshot({ path: `${SCRATCH}/between.png` });
 

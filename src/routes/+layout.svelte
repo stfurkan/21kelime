@@ -5,18 +5,20 @@
 	import { ui } from '$lib/ui.svelte';
 	import HelpModal from '$lib/components/HelpModal.svelte';
 	import StatsModal from '$lib/components/StatsModal.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>21kelime — Günlük Türkçe Kelime Oyunu</title>
+	<title>21kelime | Günlük Türkçe Kelime Oyunu</title>
 	<meta
 		name="description"
 		content="Her gün 21 kelime: karışık harflerden kelimeyi bul! Türkçe günlük kelime bulmaca oyunu."
 	/>
-	<meta property="og:title" content="21kelime — Günlük Türkçe Kelime Oyunu" />
+	<meta property="og:title" content="21kelime | Günlük Türkçe Kelime Oyunu" />
 	<meta
 		property="og:description"
 		content="Her gün 21 tur: karışık harflerden, tüm harfleri kullanarak kelimeyi bul. Süreye karşı!"
@@ -41,34 +43,16 @@
 				title="İstatistikler"
 				aria-label="İstatistikler"
 			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.4"
-					stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7" /></svg
-				>
+				<Icon name="stats" />
 			</button>
 			<button
 				onclick={() => (ui.helpOpen = true)}
 				title="Nasıl oynanır?"
 				aria-label="Nasıl oynanır?"
 			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.2"
-					stroke-linecap="round"
-					><circle cx="12" cy="12" r="9.2" /><path
-						d="M9.6 9.2a2.6 2.6 0 1 1 3.6 2.4c-.9.4-1.2 1-1.2 1.9"
-					/><circle cx="12" cy="16.8" r="0.4" fill="currentColor" /></svg
-				>
+				<Icon name="help" />
 			</button>
+			<ThemeToggle />
 		</nav>
 	</header>
 
@@ -77,7 +61,7 @@
 	</main>
 
 	<footer>
-		<span>21kelime — her gün yeni bulmaca, gece yarısı (TSİ)</span>
+		<span>Her gece yarısı yeni bulmaca (TSİ)</span>
 	</footer>
 </div>
 
