@@ -1,0 +1,37 @@
+# Words excluded from DAILY TARGET selection (still accepted as typed answers).
+# One word per line, normalized lowercase. Comments start with #.
+amcık
+orospu
+piç
+sik
+sikmek
+sikik
+sikim
+siktir
+yarak
+yarrak
+göt
+götveren
+ibne
+kaltak
+kahpe
+pezevenk
+gavat
+taşak
+taşşak
+zübük
+bok
+boklu
+bombok
+osuruk
+sıçmak
+işemek
+meme
+penis
+vajina
+testis
+fahişe
+kevaşe
+sürtük
+döl
+dölyolu
