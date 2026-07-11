@@ -16,6 +16,16 @@
 		name="description"
 		content="Her gün 21 kelime: karışık harflerden kelimeyi bul! Türkçe günlük kelime bulmaca oyunu."
 	/>
+	<meta property="og:title" content="21kelime — Günlük Türkçe Kelime Oyunu" />
+	<meta
+		property="og:description"
+		content="Her gün 21 tur: karışık harflerden, tüm harfleri kullanarak kelimeyi bul. Süreye karşı!"
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://21kelime.com" />
+	<meta property="og:image" content="https://21kelime.com/icon-512.png" />
+	<meta property="og:locale" content="tr_TR" />
+	<meta name="twitter:card" content="summary" />
 </svelte:head>
 
 <div class="app">

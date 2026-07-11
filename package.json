@@ -13,7 +13,9 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"build:words": "node scripts/build-words.ts",
+		"test:e2e": "node scripts/e2e-gameplay.ts && node scripts/e2e-result.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -25,6 +27,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",
 		"globals": "^17.6.0",
+		"playwright-core": "^1.61.1",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",
 		"svelte": "^5.56.1",
