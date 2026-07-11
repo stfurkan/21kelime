@@ -96,7 +96,23 @@
 
 	const resuming = $derived(engine.results.length > 0 && engine.phase === 'start');
 	const lastRound = $derived(engine.roundIndex === engine.puzzle.rounds.length - 1);
+
+	// Enter starts the game and skips the between-rounds wait. Playing-phase
+	// keys live in RoundBoard; advance() and start() are phase-guarded, so a
+	// focused button firing the same action twice is harmless.
+	function onKeydown(e: KeyboardEvent) {
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (engine.phase === 'between' && (e.key === 'Enter' || e.key === ' ')) {
+			engine.advance();
+			e.preventDefault();
+		} else if (engine.phase === 'start' && e.key === 'Enter') {
+			engine.start(resuming ? engine.relax : relaxChoice);
+			e.preventDefault();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={onKeydown} />
 
 <div class="game">
 	{#if engine.phase === 'start'}
@@ -146,7 +162,7 @@
 				</p>
 				<p class="between-word good-word">{trUpper(engine.results.at(-1)?.word ?? '')}</p>
 			{/if}
-			<button class="btn" onclick={() => engine.advance()}>
+			<button class="btn" onclick={() => engine.advance()} title="Enter ile de geçebilirsin">
 				{lastRound ? 'Sonuçlar' : 'Devam'}
 				<Icon name="arrow-right" size={16} />
 			</button>

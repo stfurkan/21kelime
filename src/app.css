@@ -101,6 +101,13 @@ button {
 	padding: 0;
 }
 
+/* Fast, zoom-free taps on mobile. */
+button,
+a {
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+}
+
 a {
 	color: var(--accent);
 	text-decoration: none;

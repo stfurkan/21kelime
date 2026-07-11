@@ -88,8 +88,11 @@
 	</div>
 
 	{#if !engine.relax}
-		<div class="timer" role="timer" aria-label="Kalan süre">
-			<div class="timer-fill {timerClass}" style="width: {timerPct}%"></div>
+		<div class="timer-row" role="timer" aria-label="Kalan süre">
+			<div class="timer">
+				<div class="timer-fill {timerClass}" style="width: {timerPct}%"></div>
+			</div>
+			<span class="timer-secs {timerClass}">{Math.ceil(engine.secondsLeft)}</span>
 		</div>
 	{:else}
 		<div class="relax-tag"><Icon name="moon" size={14} /> rahat mod</div>
@@ -181,7 +184,14 @@
 		cursor: not-allowed;
 	}
 
+	.timer-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
 	.timer {
+		flex: 1;
 		height: 6px;
 		border-radius: 3px;
 		background: var(--line);
@@ -201,6 +211,23 @@
 
 	.timer-fill.danger {
 		background: var(--bad);
+	}
+
+	.timer-secs {
+		min-width: 2ch;
+		text-align: right;
+		font-size: 0.95rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		color: var(--ink-soft);
+	}
+
+	.timer-secs.warn {
+		color: var(--warn);
+	}
+
+	.timer-secs.danger {
+		color: var(--bad);
 	}
 
 	.relax-tag {
@@ -279,6 +306,10 @@
 	.tile {
 		width: min(3.6rem, calc((100% - (var(--n) - 1) * 0.4rem) / var(--n)));
 		aspect-ratio: 1;
+		/* On narrow screens 8-9 tiles get thin; keep a comfortable tap height. */
+		min-height: 2.75rem;
+		user-select: none;
+		-webkit-user-select: none;
 		border-radius: 12px;
 		background: var(--tile-bg);
 		color: var(--tile-ink);
