@@ -134,6 +134,9 @@
 	<p class="score">
 		<strong>{score}</strong><span class="denom">/<em>{engine.results.length}</em></span>
 	</p>
+	{#if engine.relax}
+		<p class="mode-tag"><Icon name="moon" size={13} /> rahat modda oynandı</p>
+	{/if}
 
 	<div class="grid" aria-label="Sonuç tablosu">
 		{#each gridRows as row (row.len)}
@@ -264,6 +267,19 @@
 		font-style: normal;
 		display: inline-block;
 		transform: translateY(0.09em);
+	}
+
+	.mode-tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin: -0.3rem 0 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--ink-soft);
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		padding: 0.15rem 0.7rem;
 	}
 
 	.grid {

@@ -1,16 +1,17 @@
 /**
- * Renders the day's result as a 1080x1350 branded PNG, sized to look good
- * in Instagram stories and feeds, WhatsApp, and X alike. Web pages cannot
- * post into other apps directly; instead the caller hands this image to
- * the OS share sheet (navigator.share with files) where Instagram, X and
- * the rest appear as targets, or downloads it on desktop.
+ * Renders the day's result as a 1080x1920 (9:16) branded PNG, the native
+ * size of Instagram Stories, Reels and TikTok; WhatsApp and X show it fine
+ * too. Web pages cannot post into other apps directly; instead the caller
+ * hands this image to the OS share sheet (navigator.share with files)
+ * where Instagram, X and the rest appear as targets, or downloads it on
+ * desktop.
  */
 import { ROUND_PLAN } from './generate.ts';
 import { scoreOf } from './share.ts';
 import type { RoundResult } from './types.ts';
 
 const W = 1080;
-const H = 1350;
+const H = 1920;
 
 const PALETTES = {
 	dark: {
@@ -70,41 +71,41 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'alphabetic';
 
-	wordmark('21', 'kelime', 96, 170);
+	wordmark('21', 'kelime', 110, 320);
 
 	// Day line
 	ctx.fillStyle = colors.soft;
-	ctx.font = font(42, 600);
+	ctx.font = font(46, 600);
 	const dayLine = opts.relax
 		? `#${opts.day} · ${opts.dateLabel} · rahat mod`
 		: `#${opts.day} · ${opts.dateLabel}`;
-	ctx.fillText(dayLine, W / 2, 250);
+	ctx.fillText(dayLine, W / 2, 410);
 
 	// Score. The denominator digits sit on the slash's bottom tip, so the
 	// whole "/21" group reads as bottom-anchored to the big number.
 	const score = scoreOf(opts.results);
-	ctx.font = font(230);
+	ctx.font = font(260);
 	const scoreW = ctx.measureText(String(score)).width;
-	ctx.font = font(110);
+	ctx.font = font(120);
 	const slashW = ctx.measureText('/').width;
 	const denomW = slashW + ctx.measureText('21').width;
 	ctx.textAlign = 'left';
-	const sx = W / 2 - (scoreW + denomW + 10) / 2;
-	ctx.font = font(230);
+	const sx = W / 2 - (scoreW + denomW + 12) / 2;
+	ctx.font = font(260);
 	ctx.fillStyle = colors.accent;
-	ctx.fillText(String(score), sx, 530);
-	ctx.font = font(110);
+	ctx.fillText(String(score), sx, 760);
+	ctx.font = font(120);
 	ctx.fillStyle = colors.soft;
-	ctx.fillText('/', sx + scoreW + 10, 540);
-	ctx.fillText('21', sx + scoreW + 10 + slashW, 552);
+	ctx.fillText('/', sx + scoreW + 12, 772);
+	ctx.fillText('21', sx + scoreW + 12 + slashW, 786);
 	ctx.textAlign = 'center';
 
 	// Grid: rows grouped by word length, drawn as one left-aligned block
 	// (leading digit column) and centered as a whole, mirroring the share text.
-	const cell = 62;
-	const gap = 14;
-	const rowGap = 20;
-	const digitColW = 46;
+	const cell = 80;
+	const gap = 18;
+	const rowGap = 26;
+	const digitColW = 58;
 	const rows: { len: number; outcomes: string[] }[] = [];
 	for (let i = 0; i < opts.results.length;) {
 		const len = ROUND_PLAN[i];
@@ -117,12 +118,12 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	}
 	const maxCells = Math.max(...rows.map((r) => r.outcomes.length));
 	const blockX = W / 2 - (digitColW + maxCells * cell + (maxCells - 1) * gap) / 2;
-	let y = 630;
+	let y = 900;
 	ctx.textAlign = 'left';
 	for (const row of rows) {
 		ctx.fillStyle = colors.soft;
-		ctx.font = font(40, 700);
-		ctx.fillText(String(row.len), blockX, y + cell / 2 + 14);
+		ctx.font = font(46, 700);
+		ctx.fillText(String(row.len), blockX, y + cell / 2 + 16);
 		let x = blockX + digitColW;
 		for (const outcome of row.outcomes) {
 			ctx.fillStyle =
@@ -132,7 +133,7 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 						? colors.revealed
 						: colors.failed;
 			ctx.beginPath();
-			ctx.roundRect(x, y, cell, cell, 14);
+			ctx.roundRect(x, y, cell, cell, 18);
 			ctx.fill();
 			x += cell + gap;
 		}
@@ -143,12 +144,12 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	if (opts.streak >= 2) {
 		ctx.textAlign = 'center';
 		ctx.fillStyle = colors.ink;
-		ctx.font = font(42, 700);
-		ctx.fillText(`Seri: ${opts.streak} gün`, W / 2, y + 38);
+		ctx.font = font(48, 700);
+		ctx.fillText(`Seri: ${opts.streak} gün`, W / 2, y + 56);
 	}
 
 	// Footer wordmark-style URL
-	wordmark('21', 'kelime.com', 52, H - 60);
+	wordmark('21', 'kelime.com', 58, H - 130);
 
 	return new Promise((resolve, reject) => {
 		canvas.toBlob(
