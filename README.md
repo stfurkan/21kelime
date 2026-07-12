@@ -16,7 +16,7 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur: süre dolmadan, karışık harf
 - Sonucunu spoiler'sız emoji kartıyla paylaşabilir, hikaye boyutunda görsel indirebilir, arkadaşına meydan okuyabilirsin.
 - Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var (her seferinde yeni kelimeler). Seri ve istatistikler yalnızca kendi cihazında tutulur.
 - Açık ve koyu tema var; oyun klavyeyle de dokunmatik ekranla da rahatça oynanır.
-- Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır. Birinci gün 2026-07-12; bu tarihi [src/lib/game/daily.ts](src/lib/game/daily.ts) içindeki `EPOCH_DATE` belirler.
+- Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır. Birinci gün 2026-07-13; bu tarihi [src/lib/game/daily.ts](src/lib/game/daily.ts) içindeki `EPOCH_DATE` belirler.
 
 ## Nasıl çalışır?
 

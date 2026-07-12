@@ -4,7 +4,7 @@
  */
 
 /** Day 1 of 21kelime. */
-export const EPOCH_DATE = '2026-07-12';
+export const EPOCH_DATE = '2026-07-13';
 export const TIME_ZONE = 'Europe/Istanbul';
 
 const DAY_MS = 86_400_000;
