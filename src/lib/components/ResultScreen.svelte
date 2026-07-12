@@ -122,8 +122,8 @@
 		}
 	}
 
-	// Instagram ve benzeri uygulamalara web'den doğrudan gönderim yok;
-	// görsel, telefonda paylaşım menüsüne gider, masaüstünde indirilir.
+	// Web pages cannot post into Instagram and friends directly; the image
+	// goes to the OS share sheet on phones and downloads on desktop.
 	async function doImageShare() {
 		const outcome = await shareResultImage({
 			day: engine.puzzle.day,

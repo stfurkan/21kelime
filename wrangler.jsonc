@@ -4,8 +4,8 @@
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2026-07-01",
 	"compatibility_flags": ["nodejs_als"],
-	// wrangler kendisi derler: panelde ayrıca build komutu gerekmez,
-	// "npx wrangler deploy" tek başına yeterlidir (yerelde de).
+	// Wrangler runs the build itself, so "npx wrangler deploy" works alone
+	// (locally and in Workers Builds; no dashboard build command needed).
 	"build": {
 		"command": "npm run build"
 	},
