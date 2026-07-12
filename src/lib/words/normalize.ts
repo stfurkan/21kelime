@@ -47,8 +47,3 @@ export function isPlayableWord(word: string, minLen = 3, maxLen = 10): boolean {
 	if (chars.length < minLen || chars.length > maxLen) return false;
 	return chars.every((ch) => LETTER_SET.has(ch));
 }
-
-/** Alphabetical index (0-28) of a Turkish letter, or -1. */
-export function letterIndex(ch: string): number {
-	return TURKISH_ALPHABET.indexOf(ch);
-}

@@ -16,7 +16,7 @@ const validationWords: string[] = wordData.validation;
 const signatureIndex = buildSignatureIndex(validationWords);
 
 /** The playable day range: day 1 up to today (Istanbul). */
-export function currentDay(): number {
+function currentDay(): number {
 	return dayNumberOf(istanbulToday());
 }
 

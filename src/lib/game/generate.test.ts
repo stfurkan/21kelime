@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import wordData from '../server/data/words.json';
 import { buildSignatureIndex, signatureOf } from '../words/signature.ts';
-import { ROUND_PLAN, ROUNDS_PER_DAY, generatePuzzle, toWire } from './generate.ts';
+import { ROUND_PLAN, generatePuzzle, toWire } from './generate.ts';
 import { fromWire } from './wire.ts';
 
 const pools = wordData.pools as unknown as Record<number, string[]>;
@@ -16,7 +16,7 @@ describe('generatePuzzle', () => {
 
 	it('follows the 21-round length ramp', () => {
 		const puzzle = generatePuzzle(3, pools, index);
-		expect(puzzle.rounds).toHaveLength(ROUNDS_PER_DAY);
+		expect(puzzle.rounds).toHaveLength(ROUND_PLAN.length);
 		puzzle.rounds.forEach((round, i) => {
 			expect(round.canonical.length).toBe(ROUND_PLAN[i]);
 			expect(round.letters).toHaveLength(ROUND_PLAN[i]);

@@ -13,7 +13,6 @@ import type { Puzzle, Round, WirePuzzle } from './types.ts';
 export const ROUND_PLAN: readonly number[] = [
 	4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9
 ];
-export const ROUNDS_PER_DAY = ROUND_PLAN.length;
 export const SECONDS_PER_ROUND = 30;
 export const REVEALS_PER_DAY = 3;
 
