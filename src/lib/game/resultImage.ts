@@ -49,6 +49,13 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	canvas.width = W;
 	canvas.height = H;
 	const ctx = canvas.getContext('2d')!;
+	// Safari gained roundRect in 16.4; fall back to square cells before that.
+	const roundedCell = (x: number, y: number, size: number, radius: number) => {
+		ctx.beginPath();
+		if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, size, size, radius);
+		else ctx.rect(x, y, size, size);
+		ctx.fill();
+	};
 	const font = (size: number, weight = 800) =>
 		`${weight} ${size}px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`;
 
@@ -132,9 +139,7 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 					: outcome === 'revealed'
 						? colors.revealed
 						: colors.failed;
-			ctx.beginPath();
-			ctx.roundRect(x, y, cell, cell, 18);
-			ctx.fill();
+			roundedCell(x, y, cell, 18);
 			x += cell + gap;
 		}
 		y += cell + rowGap;
