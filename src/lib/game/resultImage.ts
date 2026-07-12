@@ -80,12 +80,14 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 		: `#${opts.day} · ${opts.dateLabel}`;
 	ctx.fillText(dayLine, W / 2, 250);
 
-	// Score: denominator baseline sits a touch lower for optical bottom alignment.
+	// Score. The denominator digits sit on the slash's bottom tip, so the
+	// whole "/21" group reads as bottom-anchored to the big number.
 	const score = scoreOf(opts.results);
 	ctx.font = font(230);
 	const scoreW = ctx.measureText(String(score)).width;
 	ctx.font = font(110);
-	const denomW = ctx.measureText('/21').width;
+	const slashW = ctx.measureText('/').width;
+	const denomW = slashW + ctx.measureText('21').width;
 	ctx.textAlign = 'left';
 	const sx = W / 2 - (scoreW + denomW + 10) / 2;
 	ctx.font = font(230);
@@ -93,7 +95,8 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	ctx.fillText(String(score), sx, 530);
 	ctx.font = font(110);
 	ctx.fillStyle = colors.soft;
-	ctx.fillText('/21', sx + scoreW + 10, 540);
+	ctx.fillText('/', sx + scoreW + 10, 540);
+	ctx.fillText('21', sx + scoreW + 10 + slashW, 552);
 	ctx.textAlign = 'center';
 
 	// Grid: rows grouped by word length, drawn as one left-aligned block

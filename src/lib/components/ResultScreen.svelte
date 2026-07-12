@@ -3,6 +3,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { shareText, challengeText, share, scoreOf } from '$lib/game/share';
 	import { shareResultImage } from '$lib/game/resultImage';
+	import { ROUND_PLAN } from '$lib/game/generate';
 	import { loadStats } from '$lib/game/storage';
 	import { msUntilNextPuzzle, istanbulToday } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
@@ -20,6 +21,21 @@
 	const text = $derived(
 		shareText(engine.puzzle.day, engine.results, { relax: engine.relax, streak })
 	);
+
+	// Rows grouped by word length, same shape as the share text and image.
+	const gridRows = $derived.by(() => {
+		const rows: { len: number; outcomes: string[] }[] = [];
+		for (let i = 0; i < engine.results.length;) {
+			const len = ROUND_PLAN[i];
+			const outcomes: string[] = [];
+			while (i < engine.results.length && ROUND_PLAN[i] === len) {
+				outcomes.push(engine.results[i].outcome);
+				i++;
+			}
+			rows.push({ len, outcomes });
+		}
+		return rows;
+	});
 
 	const dateLabel = $derived(
 		isPractice
@@ -115,11 +131,18 @@
 
 <div class="result">
 	<p class="verdict">{verdict}</p>
-	<p class="score"><strong>{score}</strong><span>/{engine.results.length}</span></p>
+	<p class="score">
+		<strong>{score}</strong><span class="denom">/<em>{engine.results.length}</em></span>
+	</p>
 
 	<div class="grid" aria-label="Sonuç tablosu">
-		{#each engine.results as r, i (i)}
-			<span class="cell {r.outcome}" title="Tur {i + 1}"></span>
+		{#each gridRows as row (row.len)}
+			<div class="grid-row">
+				<span class="len">{row.len}</span>
+				{#each row.outcomes as outcome, k (k)}
+					<span class="cell {outcome}"></span>
+				{/each}
+			</div>
 		{/each}
 	</div>
 
@@ -229,22 +252,44 @@
 		color: var(--accent);
 	}
 
-	.score span {
+	.denom {
 		font-size: 1.6rem;
 		line-height: 1.05;
 		color: var(--ink-soft);
 		font-weight: 600;
 	}
 
+	/* Sit the denominator digits on the slash's bottom tip. */
+	.denom em {
+		font-style: normal;
+		display: inline-block;
+		transform: translateY(0.09em);
+	}
+
 	.grid {
-		display: grid;
-		grid-template-columns: repeat(7, 1.35rem);
+		display: flex;
+		flex-direction: column;
 		gap: 0.3rem;
 	}
 
+	.grid-row {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.len {
+		width: 1.05rem;
+		margin-right: 0.15rem;
+		text-align: center;
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: var(--ink-soft);
+	}
+
 	.cell {
-		width: 1.35rem;
-		height: 1.35rem;
+		width: 1.25rem;
+		height: 1.25rem;
 		border-radius: 5px;
 	}
 
