@@ -28,7 +28,8 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href="/favicon.ico" sizes="32x32" />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<title>21kelime | Günlük Türkçe Kelime Oyunu</title>
 	<meta
 		name="description"
