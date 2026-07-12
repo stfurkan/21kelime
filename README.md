@@ -11,7 +11,7 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur: süre dolmadan, karışık harf
 - Günde **21 tur** var. Kelimeler kısa başlar, gittikçe uzar: ilk turlar 4 harfli, son turlar 9 harfli.
 - Her turun süresi **30 saniye**. Süre biterse o tur yanar ama oyun sürer; gün sonunda skorun X/21 olur.
 - Günde **3 ipucu** hakkın var. İpucu, cevabın sıradaki harfini senin yerine koyar.
-- Aynı harflerle yazılabilen **bütün sözlük kelimeleri** kabul edilir: cevap eczane diye cenaze yazdıysan o da doğrudur.
+- Aynı harflerle yazılabilen **bütün sözlük kelimeleri** kabul edilir: cevap elmas diye selam yazdıysan o da doğrudur.
 - Aceleyi sevmiyorsan **rahat modu** aç: süre yok, takıldığın turu geçebilirsin. Paylaşımda "rahat mod" etiketi görünür, gizli saklı yok.
 - Sonucunu spoiler'sız emoji kartıyla paylaşabilir, hikaye boyutunda görsel indirebilir, arkadaşına meydan okuyabilirsin.
 - Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var (her seferinde yeni kelimeler). Seri ve istatistikler yalnızca kendi cihazında tutulur.

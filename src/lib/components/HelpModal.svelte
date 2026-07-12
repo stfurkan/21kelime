@@ -49,8 +49,7 @@
 		</p>
 		<p>
 			Aynı harflerle yazılabilen <em>her</em> sözlük kelimesi kabul edilir; örneğin
-			<strong>eczane</strong> ve <strong>cenaze</strong>. Kelimeler TDK madde başlarından
-			derlenmiştir.
+			<strong>elmas</strong> ve <strong>selam</strong>. Kelimeler TDK madde başlarından derlenir.
 		</p>
 		<p class="soft">Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır.</p>
 	</div>
