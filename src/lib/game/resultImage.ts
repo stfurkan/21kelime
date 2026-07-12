@@ -40,7 +40,6 @@ interface ImageOptions {
 	relax: boolean;
 	streak: number;
 	theme: 'light' | 'dark';
-	topPercent?: number | null;
 }
 
 export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
@@ -130,17 +129,12 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 		i += count;
 	}
 
-	// Badges: percentile and streak
-	ctx.textAlign = 'center';
-	ctx.fillStyle = colors.ink;
-	ctx.font = font(42, 700);
-	y += 38;
-	if (opts.topPercent != null) {
-		ctx.fillText(`Bugün ilk %${opts.topPercent} içinde`, W / 2, y);
-		y += 56;
-	}
+	// Streak badge
 	if (opts.streak >= 2) {
-		ctx.fillText(`Seri: ${opts.streak} gün`, W / 2, y);
+		ctx.textAlign = 'center';
+		ctx.fillStyle = colors.ink;
+		ctx.font = font(42, 700);
+		ctx.fillText(`Seri: ${opts.streak} gün`, W / 2, y + 38);
 	}
 
 	// Footer wordmark-style URL

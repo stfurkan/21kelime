@@ -5,7 +5,7 @@
  */
 import wordData from './data/words.json';
 import { buildSignatureIndex } from '$lib/words/signature';
-import { generatePuzzle, toWire, ROUND_PLAN } from '$lib/game/generate';
+import { generatePuzzle, toWire } from '$lib/game/generate';
 import { dayNumberOf, istanbulToday, isValidDateString } from '$lib/game/daily';
 import { hashSeed, mulberry32 } from '$lib/game/rng';
 import type { WirePuzzle } from '$lib/game/types';
@@ -42,5 +42,3 @@ export function practicePuzzle(seed: number): WirePuzzle {
 	// Mark as practice: day 0 means "not a calendar day" to the client.
 	return { ...wire, day: puzzle.day, date: 'antrenman' };
 }
-
-export { ROUND_PLAN };

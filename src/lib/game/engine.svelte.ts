@@ -175,19 +175,13 @@ export class GameEngine {
 			const j = Math.floor(Math.random() * (i + 1));
 			[this.tiles[i], this.tiles[j]] = [this.tiles[j], this.tiles[i]];
 		}
-		// Rebuild input indices: mark which tiles are used by input, in order.
-		const word = this.inputTileIndices.length;
-		if (word > 0) {
-			// Simplest correct approach: clear typed input after a shuffle.
-			this.clearInputAfterShuffle();
+		// Typed input refers to rack positions, which just moved: clear it
+		// and re-consume only the tiles locked by reveals.
+		if (this.inputTileIndices.length > 0) {
+			for (const t of this.tiles) t.used = false;
+			this.inputTileIndices = [];
+			this.consumeRevealTiles();
 		}
-	}
-
-	private clearInputAfterShuffle(): void {
-		for (const t of this.tiles) t.used = false;
-		// Re-consume tiles for revealed letters.
-		this.inputTileIndices = [];
-		this.consumeRevealTiles();
 	}
 
 	private consumeRevealTiles(): void {

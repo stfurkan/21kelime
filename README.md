@@ -10,15 +10,13 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur; her turda karışık harflerden
 - Aynı harflerle yazılabilen **her sözlük kelimesi** doğru sayılır (eczane ile cenaze, hayır ile hıyar gibi).
 - **Rahat mod** süresiz oynatır; paylaşımda ay işaretiyle görünür.
 - Geçmiş günler **Arşiv**'de, sınırsız pratik **Antrenman**'da. Seri ve istatistikler cihazında tutulur.
-- Günün bulmacasını bitirenlerin skorları anonim bir sayaçta toplanır; yeterli oyuncu varsa "Bugün ilk %10 içindesin" gibi bir sıralama görürsün.
 - Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır; gün 1 = 2026-07-12 (`EPOCH_DATE`, [src/lib/game/daily.ts](src/lib/game/daily.ts)).
 
 ## Teknik yapı
 
 - **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde çalışır.
 - Sözlük verisi yalnızca sunucuda durur; istemciye günün turları, cevaplar hafifçe şifrelenmiş halde gider. Gelecek günler istenirse 404 döner.
-- Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla karıştırılır, gün numarası havuzları dilimler. Veritabanı gerekmez, herkes aynı bulmacayı görür.
-- Skor yüzdeliği için isteğe bağlı bir **D1** tablosu kullanılır; kurulmadıysa oyun aynen çalışır, yalnızca yüzdelik gizlenir.
+- Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla karıştırılır, gün numarası havuzları dilimler. Veritabanı yoktur, herkes aynı bulmacayı görür.
 - Türkçe'ye özgü ayrıntılar: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı ünlüler sadeleştirilir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
 
 ## Geliştirme
@@ -61,10 +59,7 @@ npm run build
 npx wrangler deploy
 ```
 
-İlk kurulumda:
-
-1. **Skor yüzdeliği (isteğe bağlı):** `npx wrangler d1 create kelime21-scores` komutunun verdiği `database_id` değerini [wrangler.jsonc](wrangler.jsonc) içine yapıştır, sonra `npx wrangler d1 migrations apply kelime21-scores --remote` çalıştır. Bu adımı atlarsan oyun sorunsuz çalışır, yalnızca "bugün ilk %N" satırı görünmez.
-2. **Analitik (isteğe bağlı):** Cloudflare panelinden Web Analytics açıp beacon token'ını al; `PUBLIC_CF_BEACON_TOKEN` ortam değişkeni olarak tanımla. Çerezsizdir, onay bandı gerektirmez.
+Analitik için Cloudflare panelinden Web Analytics'i açman yeterli; alan adı Cloudflare üzerinden geçtiği için beacon otomatik eklenir. Çerezsizdir, onay bandı gerektirmez.
 
 ## Lisans ve atıf
 

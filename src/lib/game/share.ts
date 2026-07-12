@@ -25,7 +25,6 @@ export function scoreOf(results: RoundResult[]): number {
 export interface ShareOptions {
 	relax?: boolean;
 	streak?: number;
-	topPercent?: number | null;
 }
 
 export function shareText(day: number, results: RoundResult[], opts: ShareOptions = {}): string {
@@ -45,7 +44,6 @@ export function shareText(day: number, results: RoundResult[], opts: ShareOption
 	}
 	const mode = opts.relax ? ' 🌙' : '';
 	const lines = [`21kelime #${day} ${score}/${results.length}${mode}`, ...rows];
-	if (opts.topPercent != null) lines.push(`🏆 Bugün ilk %${opts.topPercent}`);
 	if ((opts.streak ?? 0) >= 2) lines.push(`Seri: ${opts.streak} gün 🔥`);
 	lines.push('https://21kelime.com');
 	return lines.join('\n');

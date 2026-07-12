@@ -3,7 +3,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { shareText, challengeText, share, scoreOf } from '$lib/game/share';
 	import { shareResultImage } from '$lib/game/resultImage';
-	import { loadStats, loadDayState, saveDayState } from '$lib/game/storage';
+	import { loadStats } from '$lib/game/storage';
 	import { msUntilNextPuzzle, istanbulToday } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
 	import { effectiveTheme } from '$lib/theme';
@@ -17,51 +17,9 @@
 	const isToday = $derived(isDaily && engine.puzzle.date === istanbulToday());
 
 	const streak = $derived(isDaily ? loadStats().currentStreak : 0);
-	let topPercent = $state<number | null>(null);
 	const text = $derived(
-		shareText(engine.puzzle.day, engine.results, {
-			relax: engine.relax,
-			streak,
-			topPercent
-		})
+		shareText(engine.puzzle.day, engine.results, { relax: engine.relax, streak })
 	);
-
-	const MIN_PLAYERS_FOR_RANK = 25;
-
-	// Submit today's score to the anonymous histogram exactly once, then
-	// cache the percentile. Absent backend (local dev) hides the rank.
-	$effect(() => {
-		if (!isToday) return;
-		const state = loadDayState(engine.puzzle.date);
-		if (!state?.done) return;
-		if (state.topPercent !== undefined) {
-			topPercent = state.topPercent;
-			return;
-		}
-		if (state.scoreSubmitted) return;
-		saveDayState(engine.puzzle.date, { ...state, scoreSubmitted: true });
-		fetch('/api/score', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ day: engine.puzzle.day, score })
-		})
-			.then((r) => (r.ok ? r.json() : null))
-			.then((data) => {
-				let result: number | null = null;
-				if (data?.available && Array.isArray(data.histogram)) {
-					const rows = data.histogram as { score: number; count: number }[];
-					const total = rows.reduce((sum, r) => sum + r.count, 0);
-					if (total >= MIN_PLAYERS_FOR_RANK) {
-						const higher = rows.filter((r) => r.score > score).reduce((s, r) => s + r.count, 0);
-						result = Math.max(1, Math.ceil(((higher + 1) / total) * 100));
-					}
-				}
-				topPercent = result;
-				const latest = loadDayState(engine.puzzle.date);
-				if (latest) saveDayState(engine.puzzle.date, { ...latest, topPercent: result });
-			})
-			.catch(() => {});
-	});
 
 	const dateLabel = $derived(
 		isPractice
@@ -137,8 +95,7 @@
 			results: engine.results,
 			relax: engine.relax,
 			streak,
-			theme: effectiveTheme(),
-			topPercent
+			theme: effectiveTheme()
 		});
 		if (outcome === 'downloaded') flash('image-downloaded', 3200);
 	}
@@ -159,9 +116,6 @@
 <div class="result">
 	<p class="verdict">{verdict}</p>
 	<p class="score"><strong>{score}</strong><span>/{engine.results.length}</span></p>
-	{#if topPercent != null}
-		<p class="rank">Bugün ilk %{topPercent} içindesin</p>
-	{/if}
 
 	<div class="grid" aria-label="Sonuç tablosu">
 		{#each engine.results as r, i (i)}
@@ -206,7 +160,7 @@
 				{@const r = engine.results[i]}
 				<li>
 					<span class="mark {r.outcome}">
-						<Icon name={r.outcome === 'failed' ? 'cross' : 'check'} size={14} />
+						<Icon name={r.outcome === 'failed' ? 'close' : 'check'} size={14} />
 					</span>
 					<a
 						href="https://sozluk.gov.tr/?ara={round.canonical}"
@@ -274,12 +228,6 @@
 		font-size: 1.6rem;
 		color: var(--ink-soft);
 		font-weight: 600;
-	}
-
-	.rank {
-		margin: 0;
-		font-weight: 700;
-		color: var(--warn);
 	}
 
 	.grid {

@@ -34,12 +34,6 @@ describe('shareText', () => {
 	it('omits the streak line for streaks under 2', () => {
 		expect(shareText(1, results('ggggggggggggggggggggg'), { streak: 1 })).not.toContain('Seri');
 	});
-
-	it('includes the daily rank when known', () => {
-		const text = shareText(1, results('ggggggggggggggggggggg'), { topPercent: 10 });
-		expect(text).toContain('🏆 Bugün ilk %10');
-		expect(shareText(1, results('ggggggggggggggggggggg'))).not.toContain('🏆');
-	});
 });
 
 describe('scoreOf', () => {

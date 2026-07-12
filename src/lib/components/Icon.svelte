@@ -12,7 +12,6 @@
 		| 'close'
 		| 'share'
 		| 'check'
-		| 'cross'
 		| 'clock'
 		| 'arrow-right';
 
@@ -31,7 +30,6 @@
 		close: '<path d="M18 6 6 18M6 6l12 12"/>',
 		share: '<path d="M4 12.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6.5M16 7l-4-4-4 4M12 3v12"/>',
 		check: '<path d="M20 6 9 17l-5-5"/>',
-		cross: '<path d="M18 6 6 18M6 6l12 12"/>',
 		clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 3.2"/>',
 		'arrow-right': '<path d="M4 12h16M13 5l7 7-7 7"/>'
 	};

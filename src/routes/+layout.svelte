@@ -2,7 +2,6 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { resolve } from '$app/paths';
-	import { env } from '$env/dynamic/public';
 	import { ui } from '$lib/ui.svelte';
 	import HelpModal from '$lib/components/HelpModal.svelte';
 	import StatsModal from '$lib/components/StatsModal.svelte';
@@ -50,13 +49,6 @@
 	<meta name="twitter:card" content="summary_large_image" />
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- static JSON-LD built from constants, no user input -->
 	{@html jsonLd}
-	{#if env.PUBLIC_CF_BEACON_TOKEN}
-		<script
-			defer
-			src="https://static.cloudflareinsights.com/beacon.min.js"
-			data-cf-beacon={`{"token": "${env.PUBLIC_CF_BEACON_TOKEN}"}`}
-		></script>
-	{/if}
 </svelte:head>
 
 <div class="app">
