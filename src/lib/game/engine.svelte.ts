@@ -149,6 +149,15 @@ export class GameEngine {
 		this.paused = !this.paused;
 	}
 
+	/**
+	 * Relax mode has no timer to end a hopeless round, so the player can
+	 * skip it explicitly. Counts as not solved; there is no going back.
+	 */
+	skip(): void {
+		if (this.phase !== 'playing' || !this.relax) return;
+		this.finishRound('failed');
+	}
+
 	/** Tap a specific rack tile. */
 	pickTile(index: number): void {
 		if (this.phase !== 'playing' || this.paused) return;

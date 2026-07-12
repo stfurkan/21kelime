@@ -171,7 +171,7 @@
 			{:else}
 				<label class="relax-toggle">
 					<input type="checkbox" bind:checked={relaxChoice} />
-					<span><Icon name="moon" size={15} /> Rahat mod <em>(süre yok)</em></span>
+					<span><Icon name="no-timer" size={15} /> Rahat mod <em>(süre yok)</em></span>
 				</label>
 				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
 			{/if}
@@ -181,7 +181,7 @@
 	{:else if engine.phase === 'between'}
 		<div class="between {engine.lastOutcome}" role="status" aria-live="polite">
 			{#if engine.lastOutcome === 'failed'}
-				<p class="between-title">Süre doldu!</p>
+				<p class="between-title">{engine.relax ? 'Olmadı, cevap:' : 'Süre doldu!'}</p>
 				<p class="between-word bad-word">{trUpper(engine.round.canonical)}</p>
 				{#if engine.round.answers.length > 1}
 					<p class="between-alts">

@@ -76,6 +76,24 @@ describe('GameEngine', () => {
 		expect(engine.phase).toBe('playing');
 	});
 
+	it('relax mode can skip a round; it counts as failed and moves on', () => {
+		const engine = freshEngine();
+		engine.start(true);
+		engine.skip();
+		expect(engine.phase).toBe('between');
+		expect(engine.results[0].outcome).toBe('failed');
+		engine.advance();
+		expect(engine.roundIndex).toBe(1);
+	});
+
+	it('skip is a no-op in timed mode', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		engine.skip();
+		expect(engine.phase).toBe('playing');
+		expect(engine.results).toHaveLength(0);
+	});
+
 	it('pause stops the clock', () => {
 		const engine = freshEngine();
 		engine.start(false);

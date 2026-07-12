@@ -13,7 +13,9 @@
 		| 'share'
 		| 'check'
 		| 'clock'
-		| 'arrow-right';
+		| 'no-timer'
+		| 'arrow-right'
+		| 'skip';
 
 	// Stroke-based, lucide-style paths on a 24x24 grid.
 	const PATHS: Record<IconName, string> = {
@@ -31,7 +33,10 @@
 		share: '<path d="M4 12.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6.5M16 7l-4-4-4 4M12 3v12"/>',
 		check: '<path d="M20 6 9 17l-5-5"/>',
 		clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 3.2"/>',
-		'arrow-right': '<path d="M4 12h16M13 5l7 7-7 7"/>'
+		'no-timer':
+			'<circle cx="12" cy="13" r="8.2"/><path d="M9.5 2.2h5M12 9.5V13"/><path d="m4 5.5 15.5 15"/>',
+		'arrow-right': '<path d="M4 12h16M13 5l7 7-7 7"/>',
+		skip: '<path d="M5 5.5v13l9-6.5z" fill="currentColor" stroke-linejoin="round"/><path d="M18 5.5v13"/>'
 	};
 </script>
 

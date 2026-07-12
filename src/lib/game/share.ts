@@ -46,7 +46,7 @@ export function shareText(day: number, results: RoundResult[], opts: ShareOption
 		rows.push(len ? `${len} ${cells}` : cells);
 		i = j;
 	}
-	const mode = opts.relax ? ' 🌙' : '';
+	const mode = opts.relax ? ' (rahat mod)' : '';
 	const lines = [`21kelime #${day} ${score}/${results.length}${mode}`, '', ...rows];
 	if ((opts.streak ?? 0) >= 2) lines.push(`Seri: ${opts.streak} gün 🔥`);
 	lines.push('', 'https://21kelime.com');

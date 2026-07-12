@@ -83,6 +83,14 @@
 				>
 					<Icon name={engine.paused ? 'play' : 'pause'} size={17} />
 				</button>
+			{:else}
+				<button
+					class="chip"
+					onclick={() => engine.skip()}
+					title="Bu turu geç: çözülmemiş sayılır, cevabı gösterir"
+				>
+					<Icon name="skip" size={15} /> Geç
+				</button>
 			{/if}
 		</div>
 	</div>
@@ -95,7 +103,7 @@
 			<span class="timer-secs {timerClass}">{Math.ceil(engine.secondsLeft)}</span>
 		</div>
 	{:else}
-		<div class="relax-tag"><Icon name="moon" size={14} /> rahat mod</div>
+		<div class="relax-tag"><Icon name="no-timer" size={14} /> rahat mod</div>
 	{/if}
 
 	{#if engine.paused}

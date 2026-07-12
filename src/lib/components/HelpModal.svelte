@@ -35,8 +35,11 @@
 				>
 			</li>
 			<li>
-				<span class="li-icon"><Icon name="moon" size={16} /></span>
-				<span><strong>Rahat mod:</strong> süre yok, keyfince çöz.</span>
+				<span class="li-icon"><Icon name="no-timer" size={16} /></span>
+				<span
+					><strong>Rahat mod:</strong> süre yok, keyfince çöz. Takıldığın turu geçebilirsin; geçilen tur
+					çözülmemiş sayılır.</span
+				>
 			</li>
 		</ul>
 		<p class="legend">

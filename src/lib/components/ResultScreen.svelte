@@ -135,7 +135,7 @@
 		<strong>{score}</strong><span class="denom">/<em>{engine.results.length}</em></span>
 	</p>
 	{#if engine.relax}
-		<p class="mode-tag"><Icon name="moon" size={13} /> rahat modda oynandı</p>
+		<p class="mode-tag"><Icon name="no-timer" size={13} /> rahat modda oynandı</p>
 	{/if}
 
 	<div class="grid" aria-label="Sonuç tablosu">

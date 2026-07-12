@@ -29,7 +29,7 @@ describe('shareText', () => {
 
 	it('marks relax mode and includes streaks of 2 or more', () => {
 		const text = shareText(1, results('ggggggggggggggggggggg'), { relax: true, streak: 5 });
-		expect(text).toContain('21/21 🌙');
+		expect(text).toContain('21/21 (rahat mod)');
 		expect(text).toContain('Seri: 5 gün 🔥');
 	});
 
