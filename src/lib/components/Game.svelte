@@ -31,7 +31,9 @@
 	// svelte-ignore state_referenced_locally
 	const persist = mode !== 'practice';
 
-	function saveProgress(done: boolean) {
+	// Completing a round clears any pendingRound clock; a mid-round tick
+	// records it so a refresh resumes with the remaining time, not a full 30s.
+	function saveProgress(done: boolean, pendingRound?: { index: number; secondsLeft: number }) {
 		if (!persist) return;
 		const prev = loadDayState(puzzle.date);
 		saveDayState(puzzle.date, {
@@ -39,13 +41,15 @@
 			revealsLeft: engine.revealsLeft,
 			relax: engine.relax,
 			done,
-			statsCounted: prev?.statsCounted ?? false
+			statsCounted: prev?.statsCounted ?? false,
+			...(pendingRound ? { pendingRound } : {})
 		});
 	}
 
 	// svelte-ignore state_referenced_locally
 	const engine = new GameEngine(puzzle, mode, {
 		onRoundDone: () => saveProgress(false),
+		onTick: (index, secondsLeft) => saveProgress(false, { index, secondsLeft }),
 		onFinish: () => {
 			saveProgress(true);
 			// Streaks/stats only count for today's daily puzzle, once.
@@ -72,13 +76,19 @@
 
 	// Restore any saved progress for this date (runs client-side after mount).
 	let restored = $state(false);
+	let hasPendingClock = $state(false);
 	$effect(() => {
 		if (restored) return;
 		restored = true;
 		if (!persist) return;
 		const saved = loadDayState(puzzle.date);
-		if (saved && saved.results.length > 0) {
-			engine.resume(saved.results, saved.revealsLeft, saved.relax);
+		if (saved && (saved.results.length > 0 || saved.pendingRound)) {
+			const pending =
+				!saved.relax && saved.pendingRound?.index === saved.results.length
+					? saved.pendingRound.secondsLeft
+					: null;
+			hasPendingClock = pending !== null;
+			engine.resume(saved.results, saved.revealsLeft, saved.relax, pending);
 		}
 	});
 
@@ -95,7 +105,9 @@
 				}).format(new Date(`${puzzle.date}T00:00:00Z`))
 	);
 
-	const resuming = $derived(engine.results.length > 0 && engine.phase === 'start');
+	const resuming = $derived(
+		(engine.results.length > 0 || hasPendingClock) && engine.phase === 'start'
+	);
 	const lastRound = $derived(engine.roundIndex === engine.puzzle.rounds.length - 1);
 
 	// A friend's challenge link (?s=<day>.<score>) shows their score on the
@@ -126,7 +138,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} onpagehide={() => engine.persistClock()} />
 
 <div class="game">
 	{#if engine.phase === 'start'}
@@ -147,7 +159,11 @@
 
 			{#if resuming}
 				<p class="resume-note">
-					Şu ana kadar <strong>{engine.results.length}/21</strong> tur oynadın.
+					{#if engine.results.length > 0}
+						Şu ana kadar <strong>{engine.results.length}/21</strong> tur oynadın.
+					{:else}
+						Yarım kalan turdan devam edeceksin.
+					{/if}
 				</p>
 				<button class="btn btn-primary big" onclick={() => engine.start(engine.relax)}>
 					Devam et

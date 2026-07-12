@@ -63,12 +63,18 @@ await page.screenshot({ path: `${SCRATCH}/failed.png` });
 
 // Reload mid-game: should offer to continue from round 4.
 await page.getByText('4/21').waitFor({ timeout: 5000 });
+// Let the round clock run down before reloading; the resume must NOT
+// hand back a fresh 30 seconds (refresh-for-extra-time exploit).
+await page.waitForTimeout(3200);
 await page.reload();
 await page.getByText(/Şu ana kadar/).waitFor({ timeout: 5000 });
 console.log('PASS: mid-game state persisted; resume offered after reload');
 await page.getByRole('button', { name: 'Devam et' }).click();
 await page.getByText('4/21').waitFor({ timeout: 3000 });
 console.log('PASS: resumed at round 4');
+const secs = Number(await page.locator('.timer-secs').textContent());
+if (secs > 28) fail(`timer reset on reload: ${secs}s remaining, expected < 28`);
+else console.log(`PASS: reload kept the round clock (${secs}s remaining, not 30)`);
 
 await browser.close();
 console.log(process.exitCode ? 'E2E: FAILURES' : 'E2E: ALL PASS');

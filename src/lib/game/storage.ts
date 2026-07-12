@@ -15,6 +15,11 @@ export interface DayState {
 	done: boolean;
 	/** Stats were already updated for this day (guards double counting). */
 	statsCounted: boolean;
+	/**
+	 * Clock of a round that was interrupted mid-play (refresh, closed tab).
+	 * Restored on resume so reloading never grants a fresh 30 seconds.
+	 */
+	pendingRound?: { index: number; secondsLeft: number };
 }
 
 export interface Stats {

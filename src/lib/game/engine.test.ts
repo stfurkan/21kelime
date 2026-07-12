@@ -128,4 +128,24 @@ describe('GameEngine', () => {
 		expect(engine.roundIndex).toBe(1);
 		expect(engine.revealsLeft).toBe(2);
 	});
+
+	it('resumes an interrupted round with the remaining clock, not a fresh 30s', () => {
+		const engine = freshEngine();
+		engine.resume([], 3, false, 7.5);
+		engine.start(false);
+		expect(engine.secondsLeft).toBe(7.5);
+		vi.advanceTimersByTime(7600);
+		expect(engine.results[0].outcome).toBe('failed');
+	});
+
+	it('reports the clock periodically so a refresh can restore it', () => {
+		const ticks: number[] = [];
+		const engine = new GameEngine(structuredClone(puzzle), 'daily', {
+			onTick: (_, secondsLeft) => ticks.push(secondsLeft)
+		});
+		engine.start(false);
+		vi.advanceTimersByTime(3000);
+		expect(ticks).toHaveLength(3);
+		expect(ticks[0]).toBeCloseTo(29, 0);
+	});
 });

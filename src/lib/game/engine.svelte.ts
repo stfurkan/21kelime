@@ -43,18 +43,25 @@ export class GameEngine {
 	private timerHandle: ReturnType<typeof setInterval> | null = null;
 	private betweenHandle: ReturnType<typeof setTimeout> | null = null;
 	private wrongHandle: ReturnType<typeof setTimeout> | null = null;
+	private tickCount = 0;
 	private onFinish: (results: RoundResult[]) => void;
 	private onRoundDone: () => void;
+	private onTick: (roundIndex: number, secondsLeft: number) => void;
 
 	constructor(
 		puzzle: Puzzle,
 		mode: GameMode,
-		hooks: { onFinish?: (results: RoundResult[]) => void; onRoundDone?: () => void } = {}
+		hooks: {
+			onFinish?: (results: RoundResult[]) => void;
+			onRoundDone?: () => void;
+			onTick?: (roundIndex: number, secondsLeft: number) => void;
+		} = {}
 	) {
 		this.puzzle = puzzle;
 		this.mode = mode;
 		this.onFinish = hooks.onFinish ?? (() => {});
 		this.onRoundDone = hooks.onRoundDone ?? (() => {});
+		this.onTick = hooks.onTick ?? (() => {});
 	}
 
 	get round(): Round {
@@ -76,12 +83,21 @@ export class GameEngine {
 		return this.results.filter((r) => r.outcome !== 'failed').length;
 	}
 
+	/** Timer to restore for the next round start (refresh mid-round). */
+	private resumeSecondsLeft: number | null = null;
+
 	/** Restore a partially played day (refresh mid-game). */
-	resume(results: RoundResult[], revealsLeft: number, relax: boolean): void {
+	resume(
+		results: RoundResult[],
+		revealsLeft: number,
+		relax: boolean,
+		secondsLeft: number | null = null
+	): void {
 		this.results = [...results];
 		this.revealsLeft = revealsLeft;
 		this.relax = relax;
 		this.roundIndex = results.length;
+		this.resumeSecondsLeft = secondsLeft;
 		if (this.roundIndex >= this.puzzle.rounds.length) {
 			this.phase = 'done';
 		}
@@ -100,7 +116,10 @@ export class GameEngine {
 		this.inputTileIndices = [];
 		this.revealedCount = 0;
 		this.revealsUsedThisRound = 0;
-		this.secondsLeft = SECONDS_PER_ROUND;
+		// A refresh mid-round must not grant a fresh clock: the interrupted
+		// round restarts with exactly the time it had left.
+		this.secondsLeft = this.resumeSecondsLeft ?? SECONDS_PER_ROUND;
+		this.resumeSecondsLeft = null;
 		this.paused = false;
 		this.lastOutcome = null;
 		this.phase = 'playing';
@@ -111,8 +130,18 @@ export class GameEngine {
 		this.timerHandle = setInterval(() => {
 			if (this.paused) return;
 			this.secondsLeft = Math.max(0, this.secondsLeft - TICK_MS / 1000);
+			// Throttled persistence hook so a refresh can restore the clock.
+			this.tickCount = (this.tickCount + 1) % 10;
+			if (this.tickCount === 0) this.onTick(this.roundIndex, this.secondsLeft);
 			if (this.secondsLeft <= 0) this.finishRound('failed');
 		}, TICK_MS);
+	}
+
+	/** Persist the exact clock right now (used on pagehide). */
+	persistClock(): void {
+		if (this.phase === 'playing' && !this.relax) {
+			this.onTick(this.roundIndex, this.secondsLeft);
+		}
 	}
 
 	togglePause(): void {
