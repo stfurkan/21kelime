@@ -2,6 +2,10 @@
 
 Günlük Türkçe kelime oyunu. Her gün 21 tur; her turda karışık harflerden, tüm harfleri kullanarak geçerli bir kelime bulmaya çalışırsın. Süre dolmadan!
 
+|             Oyun              |              Sonuç              |
+| :---------------------------: | :-----------------------------: |
+| ![Oyun ekranı](docs/oyun.png) | ![Sonuç ekranı](docs/sonuc.png) |
+
 ## Oyun
 
 - Günde **21 tur**, kelimeler gittikçe uzar: 3 tane 4 harfli, 4'er tane 5, 6 ve 7 harfli, 3'er tane 8 ve 9 harfli.
