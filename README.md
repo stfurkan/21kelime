@@ -1,6 +1,6 @@
 # 21kelime
 
-Günlük Türkçe kelime oyunu. Her gün 21 tur: karışık harflerin hepsini kullanıp geçerli bir kelime bulacaksın, üstelik süre dolmadan.
+Günlük Türkçe kelime oyunu. Her gün 21 tur: süre dolmadan, karışık harflerin hepsini kullanıp geçerli bir kelime bulmalısın.
 
 |             Oyun              |              Sonuç              |
 | :---------------------------: | :-----------------------------: |
@@ -12,8 +12,10 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur: karışık harflerin hepsini ku
 - Her turun süresi **30 saniye**. Süre biterse o tur yanar ama oyun sürer; gün sonunda skorun X/21 olur.
 - Günde **3 ipucu** hakkın var. İpucu, cevabın sıradaki harfini senin yerine koyar.
 - Aynı harflerle yazılabilen **bütün sözlük kelimeleri** kabul edilir: cevap eczane diye cenaze yazdıysan o da doğrudur.
-- Aceleyi sevmiyorsan **rahat modu** aç, süresiz oyna. Paylaşımda ay işaretiyle görünür, gizli saklı yok.
-- Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var. Seri ve istatistikler yalnızca kendi cihazında tutulur.
+- Aceleyi sevmiyorsan **rahat modu** aç: süre yok, takıldığın turu geçebilirsin. Paylaşımda "rahat mod" etiketi görünür, gizli saklı yok.
+- Sonucunu spoiler'sız emoji kartıyla paylaşabilir, hikaye boyutunda görsel indirebilir, arkadaşına meydan okuyabilirsin.
+- Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var (her seferinde yeni kelimeler). Seri ve istatistikler yalnızca kendi cihazında tutulur.
+- Açık ve koyu tema var; oyun klavyeyle de dokunmatikle de aynı rahatlıkta oynanır.
 - Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır. Birinci gün 2026-07-12; bu tarihi [src/lib/game/daily.ts](src/lib/game/daily.ts) içindeki `EPOCH_DATE` belirler.
 
 ## Nasıl çalışır?

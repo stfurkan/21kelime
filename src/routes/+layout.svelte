@@ -7,8 +7,12 @@
 	import StatsModal from '$lib/components/StatsModal.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import { pruneOldDayStates } from '$lib/game/storage';
 
 	let { children } = $props();
+
+	// Housekeeping: cap localStorage growth from years of daily play.
+	$effect(() => pruneOldDayStates());
 
 	const jsonLd =
 		'<script type="application/ld+json">' +

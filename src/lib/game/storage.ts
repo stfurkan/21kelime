@@ -63,7 +63,10 @@ function write(key: string, value: unknown): void {
 }
 
 export function loadDayState(date: string): DayState | null {
-	return read<DayState>(`${PREFIX}:day:${date}`);
+	const state = read<DayState>(`${PREFIX}:day:${date}`);
+	// A corrupted or legacy-shaped entry must degrade to "no save", never
+	// crash the app at load.
+	return state && Array.isArray(state.results) ? state : null;
 }
 
 export function saveDayState(date: string, state: DayState): void {
@@ -72,6 +75,28 @@ export function saveDayState(date: string, state: DayState): void {
 
 export function loadStats(): Stats {
 	return read<Stats>(`${PREFIX}:stats`) ?? { ...EMPTY_STATS };
+}
+
+/**
+ * Drop day states older than `keepDays` so storage never grows unbounded
+ * over years of play. Stats, streaks and the theme choice are untouched;
+ * only the per-day replay/"played" records beyond the window are lost.
+ */
+export function pruneOldDayStates(keepDays = 60): void {
+	if (!browser) return;
+	try {
+		// YYYY-MM-DD compares correctly as a string.
+		const cutoff = new Date(Date.now() - keepDays * 86_400_000).toISOString().slice(0, 10);
+		const prefix = `${PREFIX}:day:`;
+		for (let i = localStorage.length - 1; i >= 0; i--) {
+			const key = localStorage.key(i);
+			if (key?.startsWith(prefix) && key.slice(prefix.length) < cutoff) {
+				localStorage.removeItem(key);
+			}
+		}
+	} catch {
+		// Storage blocked: nothing to prune.
+	}
 }
 
 export function saveStats(stats: Stats): void {
