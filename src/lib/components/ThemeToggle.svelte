@@ -29,7 +29,7 @@
 	<button
 		onclick={toggle}
 		title={effective === 'dark' ? 'Açık tema' : 'Koyu tema'}
-		aria-label={effective === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+		aria-label={effective === 'dark' ? 'Açık temayı kullan' : 'Koyu temayı kullan'}
 	>
 		<Icon name={effective === 'dark' ? 'sun' : 'moon'} />
 	</button>

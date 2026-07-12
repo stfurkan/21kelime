@@ -87,6 +87,7 @@
 				<button
 					class="chip"
 					onclick={() => engine.skip()}
+					aria-label="Bu turu geç, çözülmemiş sayılır"
 					title="Bu turu geç: çözülmemiş sayılır, cevabı gösterir"
 				>
 					<Icon name="skip" size={15} /> Geç
@@ -112,8 +113,18 @@
 			<button class="btn btn-primary" onclick={() => engine.togglePause()}>Devam et</button>
 		</div>
 	{:else}
+		<!-- Screen readers hear the word as it is built; sighted players see the slots. -->
+		<p class="sr-only" aria-live="polite">
+			{engine.currentWord ? trUpper(engine.currentWord) : ''}
+		</p>
+
 		{#key engine.wrongShake}
-			<div class="slots" class:shake={engine.wrongShake > 0} style="--n: {engine.wordLength}">
+			<div
+				class="slots"
+				class:shake={engine.wrongShake > 0}
+				style="--n: {engine.wordLength}"
+				aria-hidden="true"
+			>
 				{#each slots as slot, i (i)}
 					<div class="slot {slot.kind}">{slot.letter ? trUpper(slot.letter) : ''}</div>
 				{/each}

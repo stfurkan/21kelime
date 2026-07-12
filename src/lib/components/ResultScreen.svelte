@@ -37,6 +37,16 @@
 		return rows;
 	});
 
+	// Spoken description of the grid for screen readers.
+	const gridSummary = $derived(
+		gridRows
+			.map((row) => {
+				const solved = row.outcomes.filter((o) => o !== 'failed').length;
+				return `${row.len} harfli kelimelerde ${solved}/${row.outcomes.length}`;
+			})
+			.join(', ')
+	);
+
 	const dateLabel = $derived(
 		isPractice
 			? 'antrenman'
@@ -138,9 +148,9 @@
 		<p class="mode-tag"><Icon name="no-timer" size={13} /> rahat modda oynandı</p>
 	{/if}
 
-	<div class="grid" aria-label="Sonuç tablosu">
+	<div class="grid" role="img" aria-label={gridSummary}>
 		{#each gridRows as row (row.len)}
-			<div class="grid-row">
+			<div class="grid-row" aria-hidden="true">
 				<span class="len">{row.len}</span>
 				{#each row.outcomes as outcome, k (k)}
 					<span class="cell {outcome}"></span>
