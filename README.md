@@ -1,27 +1,27 @@
 # 21kelime
 
-Günlük Türkçe kelime oyunu. Her gün 21 tur; her turda karışık harflerden, tüm harfleri kullanarak geçerli bir kelime bulmaya çalışırsın. Süre dolmadan!
+Günlük Türkçe kelime oyunu. Her gün 21 tur: karışık harflerin hepsini kullanıp geçerli bir kelime bulacaksın, üstelik süre dolmadan.
 
 |             Oyun              |              Sonuç              |
 | :---------------------------: | :-----------------------------: |
 | ![Oyun ekranı](docs/oyun.png) | ![Sonuç ekranı](docs/sonuc.png) |
 
-## Oyun
+## Nasıl oynanır?
 
-- Günde **21 tur**, kelimeler gittikçe uzar: 3 tane 4 harfli, 4'er tane 5, 6 ve 7 harfli, 3'er tane 8 ve 9 harfli.
-- Her tur **30 saniye**. Süre dolarsa tur yanar ama oyun devam eder; skorun X/21 olarak hesaplanır.
-- Günde **3 ipucu** hakkın var; ipucu, cevabın sıradaki harfini yerine koyar.
-- Aynı harflerle yazılabilen **her sözlük kelimesi** doğru sayılır (eczane ile cenaze, hayır ile hıyar gibi).
-- **Rahat mod** süresiz oynatır; paylaşımda ay işaretiyle görünür.
-- Geçmiş günler **Arşiv**'de, sınırsız pratik **Antrenman**'da. Seri ve istatistikler cihazında tutulur.
-- Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır; gün 1 = 2026-07-12 (`EPOCH_DATE`, [src/lib/game/daily.ts](src/lib/game/daily.ts)).
+- Günde **21 tur** var. Kelimeler kısa başlar, gittikçe uzar: ilk turlar 4 harfli, son turlar 9 harfli.
+- Her turun süresi **30 saniye**. Süre biterse o tur yanar ama oyun sürer; gün sonunda skorun X/21 olur.
+- Günde **3 ipucu** hakkın var. İpucu, cevabın sıradaki harfini senin yerine koyar.
+- Aynı harflerle yazılabilen **bütün sözlük kelimeleri** kabul edilir: cevap eczane diye cenaze yazdıysan o da doğrudur.
+- Aceleyi sevmiyorsan **rahat modu** aç, süresiz oyna. Paylaşımda ay işaretiyle görünür, gizli saklı yok.
+- Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var. Seri ve istatistikler yalnızca kendi cihazında tutulur.
+- Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır. Birinci gün 2026-07-12; bu tarihi [src/lib/game/daily.ts](src/lib/game/daily.ts) içindeki `EPOCH_DATE` belirler.
 
-## Teknik yapı
+## Nasıl çalışır?
 
-- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde çalışır.
-- Sözlük verisi yalnızca sunucuda durur; istemciye günün turları, cevaplar hafifçe şifrelenmiş halde gider. Gelecek günler istenirse 404 döner.
-- Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla karıştırılır, gün numarası havuzları dilimler. Veritabanı yoktur, herkes aynı bulmacayı görür.
-- Türkçe'ye özgü ayrıntılar: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı ünlüler sadeleştirilir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
+- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde koşar.
+- Sözlük istemciye hiç gitmez. Tarayıcıya yalnızca günün turları iner, cevaplar da hafifçe şifrelidir. Yarının bulmacasını isteyen 404 alır.
+- Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla bir kez karıştırılır, her gün havuzdan sırayla çekilir. Veritabanı yoktur; dünyanın neresinde olursan ol herkes aynı bulmacayı çözer.
+- İşin en nazik kısmı Türkçe: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı harfler sadeleşir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
 
 ## Geliştirme
 
@@ -29,44 +29,46 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur; her turda karışık harflerden
 npm install
 npm run dev            # http://localhost:5173
 npm test               # birim testleri
-npm run check          # typecheck
+npm run check          # tip denetimi
 npm run lint           # prettier + eslint
 ```
 
 ### Kelime verisi
 
-Kaynaklar: Zemberek-NLP sözlükleri (TDK madde başları) ve FrequencyWords sıklık listesi. Yeniden üretmek için:
+Kelimeler iki açık kaynaktan derlenir: Zemberek-NLP sözlükleri (TDK madde başları) ve FrequencyWords sıklık listesi. Veriyi yeniden üretmek istersen:
 
 ```bash
 ./scripts/fetch-data.sh           # ham verileri indirir
-npm run build:words               # words.json üretir
-npm run build:words -- --report   # havuz istatistikleriyle
+npm run build:words               # words.json'ı üretir
+npm run build:words -- --report   # havuz istatistiklerini de gösterir
 ```
 
-[data/blocklist.txt](data/blocklist.txt) günlük hedef olamayacak kelimeleri listeler; cevap olarak yine kabul edilirler.
+Günlük bulmacada çıkmasını istemediğin kelimeleri [data/blocklist.txt](data/blocklist.txt) dosyasına ekleyebilirsin; oyuncu yazarsa yine kabul edilir, sadece soru olarak sorulmaz.
 
-**Önemli:** Havuz sıralaması `POOL_SHUFFLE_SEED` tohumuna bağlıdır. Kelime verisini ya da tohumu değiştirmek, gelecek günlerin tamamının bulmacasını değiştirir. Yayındayken veri güncellemesini bilinçli yap ve tohum sürümünü artır.
+**Dikkat:** Havuz sırası `POOL_SHUFFLE_SEED` tohumuna bağlı. Kelime verisini ya da tohumu değiştirirsen gelecek günlerin bulmacaları baştan sona değişir. Site yayındayken veri güncellemesini bilerek ve isteyerek yap, tohumun sürümünü de artır.
 
 ### Uçtan uca testler
 
-Gerçek Chrome ile oynayarak test eder:
+Gerçek Chrome açıp oyunu baştan sona oynar:
 
 ```bash
-npm run build && npm run preview   # 4173 portunda
-npm run test:e2e                   # ayrı terminalde
+npm run build && npm run preview   # 4173 portunda çalışır
+npm run test:e2e                   # ayrı bir terminalde
 ```
 
-## Yayınlama (Cloudflare Workers)
+## Yayınlama
+
+Cloudflare Workers'a tek komutla çıkar:
 
 ```bash
 npm run build
 npx wrangler deploy
 ```
 
-Analitik için Cloudflare panelinden Web Analytics'i açman yeterli; alan adı Cloudflare üzerinden geçtiği için beacon otomatik eklenir. Çerezsizdir, onay bandı gerektirmez.
+GitHub'a bağlayıp otomatik dağıtım da kurabilirsin: Cloudflare panelinde Workers → Import a repository de, gerisini [wrangler.jsonc](wrangler.jsonc) halleder. Ziyaretçi sayıları için panelden Web Analytics'i açman yeterli; alan adı Cloudflare'dan geçtiği için kod tarafında hiçbir şey gerekmez, çerez de kullanılmaz.
 
 ## Lisans ve atıf
 
 - Kod: MIT.
 - Kelime verileri: [Zemberek-NLP](https://github.com/ahmetaa/zemberek-nlp) sözlükleri (Apache-2.0) ve [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (MIT).
-- Oyun fikri, [18words.com](https://18words.com)'dan ilham alınarak Türkçe için sıfırdan tasarlandı ve yazıldı.
+- Oyun fikri [18words.com](https://18words.com)'dan ilham aldı; Türkçe için sıfırdan tasarlanıp yazıldı.
