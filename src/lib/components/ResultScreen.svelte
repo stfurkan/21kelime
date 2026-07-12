@@ -138,14 +138,15 @@
 				</button>
 			{/if}
 			<button class="social-btn" onclick={doCopy}>
-				{shareState === 'copied' ? 'Kopyalandı' : 'Metni kopyala'}
+				{shareState === 'copied' ? 'Kopyalandı' : 'Sonucu kopyala'}
 			</button>
 			<button class="social-btn" onclick={doImageShare}>
-				{shareState === 'image-downloaded' ? 'Görsel indirildi' : 'Görsel oluştur'}
+				{shareState === 'image-downloaded' ? 'Görsel indirildi' : 'Görseli paylaş'}
 			</button>
 		</div>
 		<p class="share-hint">
-			Görsel, telefonda paylaşım menüsünü açar; Instagram hikayesi için birebir.
+			Görsel telefonda paylaşım menüsünü açar, bilgisayarda indirilir. Instagram hikayesi için
+			birebir.
 		</p>
 	{/if}
 
@@ -218,6 +219,10 @@
 		font-size: 3.2rem;
 		font-weight: 800;
 		line-height: 1;
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		gap: 0.1rem;
 	}
 
 	.score strong {
@@ -226,6 +231,7 @@
 
 	.score span {
 		font-size: 1.6rem;
+		line-height: 1.05;
 		color: var(--ink-soft);
 		font-weight: 600;
 	}

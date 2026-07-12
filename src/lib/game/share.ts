@@ -1,12 +1,16 @@
 /**
  * Spoiler-free share text. Rows follow the game's length ramp (4 to 9
- * letter words), so the format reads as 21kelime, not as a Wordle clone:
+ * letter words), so the format reads as 21kelime, not as a Wordle clone.
+ * The leading word-length digit gives every row a common left edge:
  *
  *   21kelime #12 16/21
- *   🟩🟩🟩 4
- *   🟩🟨🟩🟩 5
+ *
+ *   4 🟩🟩🟩
+ *   5 🟩🟨🟩🟩
  *   ...
+ *   9 ⬛⬛⬛
  *   Seri: 5 gün 🔥
+ *
  *   https://21kelime.com
  */
 import { ROUND_PLAN } from './generate.ts';
@@ -39,13 +43,13 @@ export function shareText(day: number, results: RoundResult[], opts: ShareOption
 			cells += EMOJI[results[j].outcome];
 			j++;
 		}
-		rows.push(len ? `${cells} ${len}` : cells);
+		rows.push(len ? `${len} ${cells}` : cells);
 		i = j;
 	}
 	const mode = opts.relax ? ' 🌙' : '';
-	const lines = [`21kelime #${day} ${score}/${results.length}${mode}`, ...rows];
+	const lines = [`21kelime #${day} ${score}/${results.length}${mode}`, '', ...rows];
 	if ((opts.streak ?? 0) >= 2) lines.push(`Seri: ${opts.streak} gün 🔥`);
-	lines.push('https://21kelime.com');
+	lines.push('', 'https://21kelime.com');
 	return lines.join('\n');
 }
 

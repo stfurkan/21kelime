@@ -80,7 +80,7 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 		: `#${opts.day} · ${opts.dateLabel}`;
 	ctx.fillText(dayLine, W / 2, 250);
 
-	// Score
+	// Score: denominator baseline sits a touch lower for optical bottom alignment.
 	const score = scoreOf(opts.results);
 	ctx.font = font(230);
 	const scoreW = ctx.measureText(String(score)).width;
@@ -93,24 +93,35 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 	ctx.fillText(String(score), sx, 530);
 	ctx.font = font(110);
 	ctx.fillStyle = colors.soft;
-	ctx.fillText('/21', sx + scoreW + 10, 530);
+	ctx.fillText('/21', sx + scoreW + 10, 540);
 	ctx.textAlign = 'center';
 
-	// Grid rows grouped by word length
+	// Grid: rows grouped by word length, drawn as one left-aligned block
+	// (leading digit column) and centered as a whole, mirroring the share text.
 	const cell = 62;
 	const gap = 14;
 	const rowGap = 20;
-	let y = 630;
-	let i = 0;
-	ctx.textAlign = 'left';
-	while (i < opts.results.length) {
+	const digitColW = 46;
+	const rows: { len: number; outcomes: string[] }[] = [];
+	for (let i = 0; i < opts.results.length;) {
 		const len = ROUND_PLAN[i];
-		let count = 0;
-		while (i + count < opts.results.length && ROUND_PLAN[i + count] === len) count++;
-		const rowW = count * cell + (count - 1) * gap + 60;
-		let x = W / 2 - rowW / 2;
-		for (let k = 0; k < count; k++) {
-			const outcome = opts.results[i + k].outcome;
+		const outcomes: string[] = [];
+		while (i < opts.results.length && ROUND_PLAN[i] === len) {
+			outcomes.push(opts.results[i].outcome);
+			i++;
+		}
+		rows.push({ len, outcomes });
+	}
+	const maxCells = Math.max(...rows.map((r) => r.outcomes.length));
+	const blockX = W / 2 - (digitColW + maxCells * cell + (maxCells - 1) * gap) / 2;
+	let y = 630;
+	ctx.textAlign = 'left';
+	for (const row of rows) {
+		ctx.fillStyle = colors.soft;
+		ctx.font = font(40, 700);
+		ctx.fillText(String(row.len), blockX, y + cell / 2 + 14);
+		let x = blockX + digitColW;
+		for (const outcome of row.outcomes) {
 			ctx.fillStyle =
 				outcome === 'solved'
 					? colors.solved
@@ -122,11 +133,7 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 			ctx.fill();
 			x += cell + gap;
 		}
-		ctx.fillStyle = colors.soft;
-		ctx.font = font(40, 700);
-		ctx.fillText(String(len), x + 8, y + cell / 2 + 14);
 		y += cell + rowGap;
-		i += count;
 	}
 
 	// Streak badge
