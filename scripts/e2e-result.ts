@@ -76,5 +76,16 @@ await page.getByRole('button', { name: 'Başla' }).click();
 await page.getByText('1/21').waitFor({ timeout: 4000 });
 console.log('PASS: practice mode starts');
 
+// Relax mode: skip button fails the round, shows the answer, moves on.
+await page.goto(`${BASE}/antrenman`);
+await page.locator('input[type=checkbox]').check();
+await page.getByRole('button', { name: 'Başla' }).click();
+await page.getByText('1/21').waitFor({ timeout: 4000 });
+await page.getByRole('button', { name: 'Bu turu geç, çözülmemiş sayılır' }).click();
+await page.getByText('Olmadı, cevap:').waitFor({ timeout: 3000 });
+await page.getByRole('button', { name: /Devam/ }).click();
+await page.getByText('2/21').waitFor({ timeout: 3000 });
+console.log('PASS: relax skip counts as failed and advances');
+
 await browser.close();
 console.log(process.exitCode ? 'E2E: FAILURES' : 'E2E RESULT: ALL PASS');

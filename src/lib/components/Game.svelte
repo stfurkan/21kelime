@@ -132,6 +132,8 @@
 	// focused button firing the same action twice is harmless.
 	function onKeydown(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		// Keys belong to an open dialog (help/stats), not to the game.
+		if (document.querySelector('dialog[open]')) return;
 		if (engine.phase === 'between' && (e.key === 'Enter' || e.key === ' ')) {
 			engine.advance();
 			e.preventDefault();

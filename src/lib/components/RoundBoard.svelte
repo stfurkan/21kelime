@@ -32,6 +32,8 @@
 
 	function onKeydown(e: KeyboardEvent) {
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		// Keys belong to an open dialog (help/stats), not to the board.
+		if (document.querySelector('dialog[open]')) return;
 		if (e.key === 'Backspace' || e.key === 'Delete') {
 			engine.backspace();
 			e.preventDefault();
