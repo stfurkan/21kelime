@@ -60,10 +60,9 @@ npm run test:e2e                   # ayrı bir terminalde
 
 ## Yayınlama
 
-Cloudflare Workers'a yayınlamak için iki komut yeter:
+Cloudflare Workers'a yayınlamak için tek komut yeter (derlemeyi wrangler kendisi çalıştırır):
 
 ```bash
-npm run build
 npx wrangler deploy
 ```
 
