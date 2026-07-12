@@ -15,6 +15,10 @@ export interface DayState {
 	done: boolean;
 	/** Stats were already updated for this day (guards double counting). */
 	statsCounted: boolean;
+	/** Score was sent to the anonymous daily histogram (guards double posts). */
+	scoreSubmitted?: boolean;
+	/** Cached "top N% today" result, null when not enough players. */
+	topPercent?: number | null;
 }
 
 export interface Stats {

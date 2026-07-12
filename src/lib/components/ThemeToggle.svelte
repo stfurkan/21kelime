@@ -1,20 +1,14 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { effectiveTheme } from '$lib/theme';
 	import Icon from './Icon.svelte';
 
-	// Effective theme right now (explicit choice wins, else system preference).
 	let effective = $state<'light' | 'dark'>('light');
 
-	function compute(): 'light' | 'dark' {
-		const chosen = document.documentElement.dataset.theme;
-		if (chosen === 'light' || chosen === 'dark') return chosen;
-		return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	}
-
 	$effect(() => {
-		effective = compute();
+		effective = effectiveTheme();
 		const mq = matchMedia('(prefers-color-scheme: dark)');
-		const onChange = () => (effective = compute());
+		const onChange = () => (effective = effectiveTheme());
 		mq.addEventListener('change', onChange);
 		return () => mq.removeEventListener('change', onChange);
 	});

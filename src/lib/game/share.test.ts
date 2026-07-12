@@ -12,7 +12,7 @@ function results(outcomes: string): RoundResult[] {
 
 describe('shareText', () => {
 	it('groups rows by word length with a length label', () => {
-		const text = shareText(5, results('gggggggyyyyyyybbbbbbb'), false);
+		const text = shareText(5, results('gggggggyyyyyyybbbbbbb'));
 		const lines = text.split('\n');
 		expect(lines[0]).toBe('21kelime #5 14/21');
 		expect(lines[1]).toBe('🟩🟩🟩 4');
@@ -26,13 +26,19 @@ describe('shareText', () => {
 	});
 
 	it('marks relax mode and includes streaks of 2 or more', () => {
-		const text = shareText(1, results('ggggggggggggggggggggg'), true, 5);
+		const text = shareText(1, results('ggggggggggggggggggggg'), { relax: true, streak: 5 });
 		expect(text).toContain('21/21 🌙');
 		expect(text).toContain('Seri: 5 gün 🔥');
 	});
 
 	it('omits the streak line for streaks under 2', () => {
-		expect(shareText(1, results('ggggggggggggggggggggg'), false, 1)).not.toContain('Seri');
+		expect(shareText(1, results('ggggggggggggggggggggg'), { streak: 1 })).not.toContain('Seri');
+	});
+
+	it('includes the daily rank when known', () => {
+		const text = shareText(1, results('ggggggggggggggggggggg'), { topPercent: 10 });
+		expect(text).toContain('🏆 Bugün ilk %10');
+		expect(shareText(1, results('ggggggggggggggggggggg'))).not.toContain('🏆');
 	});
 });
 

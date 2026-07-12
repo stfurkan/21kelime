@@ -1,23 +1,67 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { GameEngine } from '$lib/game/engine.svelte';
-	import { shareText, share, scoreOf } from '$lib/game/share';
+	import { shareText, challengeText, share, scoreOf } from '$lib/game/share';
 	import { shareResultImage } from '$lib/game/resultImage';
-	import { loadStats } from '$lib/game/storage';
-	import { msUntilNextPuzzle } from '$lib/game/daily';
+	import { loadStats, loadDayState, saveDayState } from '$lib/game/storage';
+	import { msUntilNextPuzzle, istanbulToday } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
+	import { effectiveTheme } from '$lib/theme';
 	import Icon from './Icon.svelte';
-	import BrandIcon from './BrandIcon.svelte';
 
 	let { engine, onNewPractice }: { engine: GameEngine; onNewPractice?: () => void } = $props();
 
 	const score = $derived(scoreOf(engine.results));
 	const isDaily = $derived(engine.mode === 'daily');
 	const isPractice = $derived(engine.mode === 'practice');
+	const isToday = $derived(isDaily && engine.puzzle.date === istanbulToday());
 
 	const streak = $derived(isDaily ? loadStats().currentStreak : 0);
-	const text = $derived(shareText(engine.puzzle.day, engine.results, engine.relax, streak));
-	const encoded = $derived(encodeURIComponent(text));
+	let topPercent = $state<number | null>(null);
+	const text = $derived(
+		shareText(engine.puzzle.day, engine.results, {
+			relax: engine.relax,
+			streak,
+			topPercent
+		})
+	);
+
+	const MIN_PLAYERS_FOR_RANK = 25;
+
+	// Submit today's score to the anonymous histogram exactly once, then
+	// cache the percentile. Absent backend (local dev) hides the rank.
+	$effect(() => {
+		if (!isToday) return;
+		const state = loadDayState(engine.puzzle.date);
+		if (!state?.done) return;
+		if (state.topPercent !== undefined) {
+			topPercent = state.topPercent;
+			return;
+		}
+		if (state.scoreSubmitted) return;
+		saveDayState(engine.puzzle.date, { ...state, scoreSubmitted: true });
+		fetch('/api/score', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ day: engine.puzzle.day, score })
+		})
+			.then((r) => (r.ok ? r.json() : null))
+			.then((data) => {
+				let result: number | null = null;
+				if (data?.available && Array.isArray(data.histogram)) {
+					const rows = data.histogram as { score: number; count: number }[];
+					const total = rows.reduce((sum, r) => sum + r.count, 0);
+					if (total >= MIN_PLAYERS_FOR_RANK) {
+						const higher = rows.filter((r) => r.score > score).reduce((s, r) => s + r.count, 0);
+						result = Math.max(1, Math.ceil(((higher + 1) / total) * 100));
+					}
+				}
+				topPercent = result;
+				const latest = loadDayState(engine.puzzle.date);
+				if (latest) saveDayState(engine.puzzle.date, { ...latest, topPercent: result });
+			})
+			.catch(() => {});
+	});
 
 	const dateLabel = $derived(
 		isPractice
@@ -30,7 +74,7 @@
 				}).format(new Date(`${engine.puzzle.date}T00:00:00Z`))
 	);
 
-	let shareState = $state<'idle' | 'copied' | 'shared' | 'image-downloaded'>('idle');
+	let shareState = $state<'idle' | 'copied' | 'challenge-copied' | 'image-downloaded'>('idle');
 	let countdown = $state('');
 
 	$effect(() => {
@@ -47,40 +91,56 @@
 		return () => clearInterval(handle);
 	});
 
+	function flash(state: typeof shareState, ms = 2400) {
+		shareState = state;
+		setTimeout(() => (shareState = 'idle'), ms);
+	}
+
 	async function doShare() {
 		const result = await share(text);
-		if (result === 'copied') {
-			shareState = 'copied';
-			setTimeout(() => (shareState = 'idle'), 2200);
-		} else if (result === 'shared') {
-			shareState = 'shared';
-		}
+		if (result === 'copied') flash('copied');
 	}
 
 	async function doCopy() {
 		try {
 			await navigator.clipboard.writeText(text);
-			shareState = 'copied';
-			setTimeout(() => (shareState = 'idle'), 2200);
+			flash('copied');
 		} catch {
 			// Clipboard blocked: the native share button still works.
 		}
 	}
 
-	// Instagram has no web share URL; the path in is a story-ready image
-	// through the OS share sheet (mobile) or a download (desktop).
+	async function doChallenge() {
+		const challenge = challengeText(engine.puzzle.day, engine.results);
+		if (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0 && 'share' in navigator) {
+			try {
+				await navigator.share({ text: challenge });
+				return;
+			} catch {
+				// fall through to clipboard
+			}
+		}
+		try {
+			await navigator.clipboard.writeText(challenge);
+			flash('challenge-copied');
+		} catch {
+			// ignore
+		}
+	}
+
+	// Instagram ve benzeri uygulamalara web'den doğrudan gönderim yok;
+	// görsel, telefonda paylaşım menüsüne gider, masaüstünde indirilir.
 	async function doImageShare() {
 		const outcome = await shareResultImage({
 			day: engine.puzzle.day,
 			dateLabel,
 			results: engine.results,
 			relax: engine.relax,
-			streak
+			streak,
+			theme: effectiveTheme(),
+			topPercent
 		});
-		if (outcome === 'downloaded') {
-			shareState = 'image-downloaded';
-			setTimeout(() => (shareState = 'idle'), 3200);
-		}
+		if (outcome === 'downloaded') flash('image-downloaded', 3200);
 	}
 
 	const verdict = $derived(
@@ -91,14 +151,17 @@
 				: score >= 12
 					? 'Güzel oyun!'
 					: score >= 7
-						? 'Fena değil'
-						: 'Yarın yeni şans'
+						? 'Fena değil!'
+						: 'Olsun, yarın yenisi var'
 	);
 </script>
 
 <div class="result">
 	<p class="verdict">{verdict}</p>
 	<p class="score"><strong>{score}</strong><span>/{engine.results.length}</span></p>
+	{#if topPercent != null}
+		<p class="rank">Bugün ilk %{topPercent} içindesin</p>
+	{/if}
 
 	<div class="grid" aria-label="Sonuç tablosu">
 		{#each engine.results as r, i (i)}
@@ -114,59 +177,12 @@
 				<Icon name="share" size={17} /> Sonucu paylaş
 			{/if}
 		</button>
-		<div class="social" aria-label="Sosyal medyada paylaş">
-			<a
-				class="brand"
-				href="https://wa.me/?text={encoded}"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="WhatsApp'ta paylaş"
-				title="WhatsApp"><BrandIcon name="whatsapp" /></a
-			>
-			<a
-				class="brand"
-				href="https://www.instagram.com"
-				onclick={(e) => {
-					e.preventDefault();
-					doImageShare();
-				}}
-				aria-label="Instagram için görsel oluştur"
-				title="Instagram (görsel oluşturur)"><BrandIcon name="instagram" /></a
-			>
-			<a
-				class="brand"
-				href="https://x.com/intent/post?text={encoded}"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="X'te paylaş"
-				title="X"><BrandIcon name="x" /></a
-			>
-			<a
-				class="brand"
-				href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F21kelime.com&quote={encoded}"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="Facebook'ta paylaş"
-				title="Facebook"><BrandIcon name="facebook" /></a
-			>
-			<a
-				class="brand"
-				href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2F21kelime.com"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="LinkedIn'de paylaş"
-				title="LinkedIn"><BrandIcon name="linkedin" /></a
-			>
-			<a
-				class="brand"
-				href="https://t.me/share/url?url=https%3A%2F%2F21kelime.com&text={encoded}"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="Telegram'da paylaş"
-				title="Telegram"><BrandIcon name="telegram" /></a
-			>
-		</div>
 		<div class="pills">
+			{#if isToday}
+				<button class="social-btn" onclick={doChallenge}>
+					{shareState === 'challenge-copied' ? 'Kopyalandı, gönder!' : 'Arkadaşına meydan oku'}
+				</button>
+			{/if}
 			<button class="social-btn" onclick={doCopy}>
 				{shareState === 'copied' ? 'Kopyalandı' : 'Metni kopyala'}
 			</button>
@@ -174,6 +190,9 @@
 				{shareState === 'image-downloaded' ? 'Görsel indirildi' : 'Görsel oluştur'}
 			</button>
 		</div>
+		<p class="share-hint">
+			Görsel, telefonda paylaşım menüsünü açar; Instagram hikayesi için birebir.
+		</p>
 	{/if}
 
 	{#if isDaily}
@@ -205,6 +224,13 @@
 				</li>
 			{/each}
 		</ol>
+		<p class="report">
+			Bir kelimeye itirazın mı var?
+			<a
+				href="mailto:iletisim@21kelime.com?subject=Kelime%20itiraz%C4%B1%20%2321kelime%20{engine
+					.puzzle.day}">Bize yaz</a
+			>
+		</p>
 	</details>
 
 	<div class="links">
@@ -250,6 +276,12 @@
 		font-weight: 600;
 	}
 
+	.rank {
+		margin: 0;
+		font-weight: 700;
+		color: var(--warn);
+	}
+
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(7, 1.35rem);
@@ -278,29 +310,6 @@
 		min-width: 12rem;
 	}
 
-	.social {
-		display: flex;
-		gap: 0.55rem;
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.brand {
-		display: grid;
-		place-items: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border-radius: 50%;
-		color: var(--ink-soft);
-		border: 1px solid var(--line);
-		background: var(--bg-raised);
-	}
-
-	.brand:hover {
-		color: var(--accent);
-		border-color: var(--accent);
-	}
-
 	.pills {
 		display: flex;
 		gap: 0.5rem;
@@ -321,6 +330,12 @@
 	.social-btn:hover {
 		color: var(--accent);
 		border-color: var(--accent);
+	}
+
+	.share-hint {
+		margin: 0;
+		font-size: 0.78rem;
+		color: var(--ink-soft);
 	}
 
 	.next {
@@ -377,6 +392,12 @@
 	.alts {
 		color: var(--ink-soft);
 		font-size: 0.85rem;
+	}
+
+	.report {
+		margin: 0.7rem 0 0.1rem;
+		font-size: 0.82rem;
+		color: var(--ink-soft);
 	}
 
 	.links {

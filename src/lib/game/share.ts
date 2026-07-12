@@ -22,7 +22,13 @@ export function scoreOf(results: RoundResult[]): number {
 	return results.filter((r) => r.outcome !== 'failed').length;
 }
 
-export function shareText(day: number, results: RoundResult[], relax: boolean, streak = 0): string {
+export interface ShareOptions {
+	relax?: boolean;
+	streak?: number;
+	topPercent?: number | null;
+}
+
+export function shareText(day: number, results: RoundResult[], opts: ShareOptions = {}): string {
 	const score = scoreOf(results);
 	const rows: string[] = [];
 	let i = 0;
@@ -37,11 +43,18 @@ export function shareText(day: number, results: RoundResult[], relax: boolean, s
 		rows.push(len ? `${cells} ${len}` : cells);
 		i = j;
 	}
-	const mode = relax ? ' 🌙' : '';
+	const mode = opts.relax ? ' 🌙' : '';
 	const lines = [`21kelime #${day} ${score}/${results.length}${mode}`, ...rows];
-	if (streak >= 2) lines.push(`Seri: ${streak} gün 🔥`);
+	if (opts.topPercent != null) lines.push(`🏆 Bugün ilk %${opts.topPercent}`);
+	if ((opts.streak ?? 0) >= 2) lines.push(`Seri: ${opts.streak} gün 🔥`);
 	lines.push('https://21kelime.com');
 	return lines.join('\n');
+}
+
+/** Text for the "challenge a friend" button. */
+export function challengeText(day: number, results: RoundResult[]): string {
+	const score = scoreOf(results);
+	return `Bugünkü 21kelime bulmacasında ${score}/${results.length} yaptım. Sen kaç yaparsın?\nhttps://21kelime.com/?s=${day}.${score}`;
 }
 
 export async function share(text: string): Promise<'shared' | 'copied' | 'failed'> {

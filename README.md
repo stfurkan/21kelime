@@ -1,70 +1,73 @@
 # 21kelime
 
-**Günlük Türkçe kelime oyunu** — her gün 21 tur; her turda karışık harflerden, **tüm harfleri kullanarak** geçerli bir Türkçe kelime bul, süre dolmadan!
-
-[18words.com](https://18words.com) konseptinin Türkçe uyarlamasıdır (mekanikler yeniden tasarlandı ve sıfırdan yazıldı).
+Günlük Türkçe kelime oyunu. Her gün 21 tur; her turda karışık harflerden, tüm harfleri kullanarak geçerli bir kelime bulmaya çalışırsın. Süre dolmadan!
 
 ## Oyun
 
-- **21 tur / gün**, zorluk rampası: 3×4, 4×5, 4×6, 4×7, 3×8, 3×9 harfli kelimeler.
-- Her tur **30 saniye**; süre dolarsa tur yanar ama oyun devam eder (skor X/21).
-- Günde **3 ipucu**: cevabın sıradaki harfini yerine koyar (o tur 🟨 sayılır).
-- **Aynı harflerle yazılan her sözlük kelimesi kabul edilir** (ör. _eczane / cenaze_, _hayır / hıyar_).
-- 🌙 **Rahat mod**: süresiz oyna (paylaşımda 🌙 ile işaretlenir).
-- **Arşiv** (geçmiş günler), **Antrenman** (sınırsız pratik), seri/istatistik takibi, spoiler'sız emoji paylaşım tablosu.
-- Yeni bulmaca her gece yarısı **Türkiye saatiyle** (Europe/Istanbul, tüm dünya için aynı anda) yayınlanır. Gün 1 = 2026-07-12.
+- Günde **21 tur**, kelimeler gittikçe uzar: 3 tane 4 harfli, 4'er tane 5, 6 ve 7 harfli, 3'er tane 8 ve 9 harfli.
+- Her tur **30 saniye**. Süre dolarsa tur yanar ama oyun devam eder; skorun X/21 olarak hesaplanır.
+- Günde **3 ipucu** hakkın var; ipucu, cevabın sıradaki harfini yerine koyar.
+- Aynı harflerle yazılabilen **her sözlük kelimesi** doğru sayılır (eczane ile cenaze, hayır ile hıyar gibi).
+- **Rahat mod** süresiz oynatır; paylaşımda ay işaretiyle görünür.
+- Geçmiş günler **Arşiv**'de, sınırsız pratik **Antrenman**'da. Seri ve istatistikler cihazında tutulur.
+- Günün bulmacasını bitirenlerin skorları anonim bir sayaçta toplanır; yeterli oyuncu varsa "Bugün ilk %10 içindesin" gibi bir sıralama görürsün.
+- Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır; gün 1 = 2026-07-12 (`EPOCH_DATE`, [src/lib/game/daily.ts](src/lib/game/daily.ts)).
 
-## Teknoloji
+## Teknik yapı
 
-- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4.
-- Sunucu tarafında tek `words.json` (sözlük istemciye asla gönderilmez); istemciye yalnızca günün turları, cevaplar hafifçe şifrelenmiş (XOR+hex — casual spoiler koruması) gider.
-- Bulmacalar **deterministik** üretilir: build sırasında uzunluk başına seed'li karıştırılmış hedef havuzları çıkar, gün N havuzları dilimler → herkes aynı bulmacayı görür, sunucuda durum tutulmaz, kelimeler havuz bitene dek tekrarlanmaz.
-- İlerleme/istatistik `localStorage`'da; hesap yok, çerez yok.
-
-### Türkçe'ye özgü ayrıntılar
-
-- Tüm harf işlemleri `tr-TR` locale ile (`toLocaleUpperCase`): `i→İ`, `ı→I`. Klavye girişi hem Türkçe Q hem F düzeninde çalışır (karakter bazlı).
-- Şapkalı ünlüler oyunda sadeleştirilir: `â→a, î→i, û→u` (kâr = kar).
-- Kelime kaynağı: [Zemberek-NLP](https://github.com/ahmetaa/zemberek-nlp) sözlükleri (Apache-2.0, TDK madde başları) + sıklık için [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (MIT). Hedef kelimeler sıklık eşiğiyle seçilir; doğrulama seti ~27k madde başıdır. `data/blocklist.txt` günlük hedeflerden çıkarılacak kelimeleri listeler (cevap olarak yine kabul edilirler).
+- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde çalışır.
+- Sözlük verisi yalnızca sunucuda durur; istemciye günün turları, cevaplar hafifçe şifrelenmiş halde gider. Gelecek günler istenirse 404 döner.
+- Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla karıştırılır, gün numarası havuzları dilimler. Veritabanı gerekmez, herkes aynı bulmacayı görür.
+- Skor yüzdeliği için isteğe bağlı bir **D1** tablosu kullanılır; kurulmadıysa oyun aynen çalışır, yalnızca yüzdelik gizlenir.
+- Türkçe'ye özgü ayrıntılar: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı ünlüler sadeleştirilir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
 
 ## Geliştirme
 
 ```bash
 npm install
 npm run dev            # http://localhost:5173
-npm test               # birim testleri (41 test)
-npm run check          # svelte-check / typecheck
+npm test               # birim testleri
+npm run check          # typecheck
 npm run lint           # prettier + eslint
 ```
 
-### Kelime verisini yeniden üretme
+### Kelime verisi
+
+Kaynaklar: Zemberek-NLP sözlükleri (TDK madde başları) ve FrequencyWords sıklık listesi. Yeniden üretmek için:
 
 ```bash
-./scripts/fetch-data.sh    # ham verileri data/raw/ altına indirir
-npm run build:words        # src/lib/server/data/words.json üretir
+./scripts/fetch-data.sh           # ham verileri indirir
+npm run build:words               # words.json üretir
 npm run build:words -- --report   # havuz istatistikleriyle
 ```
 
-> Havuz sıralaması `21kelime-pools-v1` seed'iyle sabittir; seed'i değiştirmek TÜM günlerin bulmacalarını değiştirir. Yayına girdikten sonra kelime eklemek/çıkarmak da sonraki günlerin dizilimini kaydırır — canlıda veri güncellemesini yeni bir `POOL_SHUFFLE_SEED` sürümüyle ve bilinçli yap.
+[data/blocklist.txt](data/blocklist.txt) günlük hedef olamayacak kelimeleri listeler; cevap olarak yine kabul edilirler.
 
-### Uçtan uca testler (gerçek Chrome ile oynar)
+**Önemli:** Havuz sıralaması `POOL_SHUFFLE_SEED` tohumuna bağlıdır. Kelime verisini ya da tohumu değiştirmek, gelecek günlerin tamamının bulmacasını değiştirir. Yayındayken veri güncellemesini bilinçli yap ve tohum sürümünü artır.
+
+### Uçtan uca testler
+
+Gerçek Chrome ile oynayarak test eder:
 
 ```bash
 npm run build && npm run preview   # 4173 portunda
 npm run test:e2e                   # ayrı terminalde
 ```
 
-## Dağıtım
+## Yayınlama (Cloudflare Workers)
 
-`@sveltejs/adapter-auto` kuruludur: Vercel / Netlify / Cloudflare'a repo'yu bağlamak yeterli. Belirli bir platforma sabitlemek için ilgili adapter'ı kur ([docs](https://svelte.dev/docs/kit/adapters)). Sunucu tarafı yalnızca iki küçük GET endpoint'i çalıştırır (`/api/puzzle/[date]`, `/api/practice`); veritabanı gerekmez.
+```bash
+npm run build
+npx wrangler deploy
+```
 
-Yayın kontrol listesi:
+İlk kurulumda:
 
-1. `21kelime.com` alan adını kaydet ve platforma bağla.
-2. `npm run build` — üretim derlemesi.
-3. Gün 1 tarihi `src/lib/game/daily.ts` içindeki `EPOCH_DATE` sabitidir; lansman gününe göre güncelle.
-4. (İsteğe bağlı) Plausible/Umami gibi çerezsiz analitik ekle.
+1. **Skor yüzdeliği (isteğe bağlı):** `npx wrangler d1 create kelime21-scores` komutunun verdiği `database_id` değerini [wrangler.jsonc](wrangler.jsonc) içine yapıştır, sonra `npx wrangler d1 migrations apply kelime21-scores --remote` çalıştır. Bu adımı atlarsan oyun sorunsuz çalışır, yalnızca "bugün ilk %N" satırı görünmez.
+2. **Analitik (isteğe bağlı):** Cloudflare panelinden Web Analytics açıp beacon token'ını al; `PUBLIC_CF_BEACON_TOKEN` ortam değişkeni olarak tanımla. Çerezsizdir, onay bandı gerektirmez.
 
 ## Lisans ve atıf
 
-Kod: MIT. Kelime verileri: Zemberek-NLP sözlükleri (Apache-2.0), FrequencyWords sıklık listesi (MIT). Oyun konsepti ilhamı: 18words.
+- Kod: MIT.
+- Kelime verileri: [Zemberek-NLP](https://github.com/ahmetaa/zemberek-nlp) sözlükleri (Apache-2.0) ve [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (MIT).
+- Oyun fikri, [18words.com](https://18words.com)'dan ilham alınarak Türkçe için sıfırdan tasarlandı ve yazıldı.

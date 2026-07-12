@@ -64,7 +64,7 @@ await page.screenshot({ path: `${SCRATCH}/failed.png` });
 // Reload mid-game: should offer to continue from round 4.
 await page.getByText('4/21').waitFor({ timeout: 5000 });
 await page.reload();
-await page.getByText(/Kaldığın yerden/).waitFor({ timeout: 5000 });
+await page.getByText(/Şu ana kadar/).waitFor({ timeout: 5000 });
 console.log('PASS: mid-game state persisted; resume offered after reload');
 await page.getByRole('button', { name: 'Devam et' }).click();
 await page.getByText('4/21').waitFor({ timeout: 3000 });

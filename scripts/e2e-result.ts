@@ -34,7 +34,7 @@ await page.evaluate(
 	[puzzle.date, results] as const
 );
 await page.reload();
-await page.getByText(/Kaldığın yerden/).waitFor({ timeout: 4000 });
+await page.getByText(/Şu ana kadar/).waitFor({ timeout: 4000 });
 await page.getByRole('button', { name: 'Devam et' }).click();
 await page.getByText('21/21').waitFor({ timeout: 3000 });
 console.log('PASS: resumed at final round 21');

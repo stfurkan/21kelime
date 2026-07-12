@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { resolve } from '$app/paths';
+	import { env } from '$env/dynamic/public';
 	import { ui } from '$lib/ui.svelte';
 	import HelpModal from '$lib/components/HelpModal.svelte';
 	import StatsModal from '$lib/components/StatsModal.svelte';
@@ -9,6 +10,22 @@
 	import Icon from '$lib/components/Icon.svelte';
 
 	let { children } = $props();
+
+	const jsonLd =
+		'<script type="application/ld+json">' +
+		JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'WebApplication',
+			name: '21kelime',
+			url: 'https://21kelime.com',
+			applicationCategory: 'GameApplication',
+			operatingSystem: 'Web',
+			inLanguage: 'tr',
+			description: 'Her gün 21 tur: karışık harflerden, tüm harfleri kullanarak kelimeyi bul.',
+			offers: { '@type': 'Offer', price: '0', priceCurrency: 'TRY' }
+		}) +
+		'<' +
+		'/script>';
 </script>
 
 <svelte:head>
@@ -28,8 +45,18 @@
 	<meta property="og:image" content="https://21kelime.com/og.png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="21kelime: günlük Türkçe kelime oyunu" />
 	<meta property="og:locale" content="tr_TR" />
 	<meta name="twitter:card" content="summary_large_image" />
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- static JSON-LD built from constants, no user input -->
+	{@html jsonLd}
+	{#if env.PUBLIC_CF_BEACON_TOKEN}
+		<script
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon={`{"token": "${env.PUBLIC_CF_BEACON_TOKEN}"}`}
+		></script>
+	{/if}
 </svelte:head>
 
 <div class="app">

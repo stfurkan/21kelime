@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "21kelime",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2026-01-15",
+	"compatibility_flags": ["nodejs_als"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	// "Bugün ilk %N" skor yüzdeliği için isteğe bağlı D1 veritabanı.
+	// Kurulum: npx wrangler d1 create kelime21-scores
+	//          çıktıdaki database_id değerini aşağıya yapıştır,
+	//          npx wrangler d1 migrations apply kelime21-scores --remote
+	// Bu binding olmadan da oyun sorunsuz çalışır, yalnızca yüzdelik gizlenir.
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "kelime21-scores",
+			"database_id": "D1_CREATE_SONRASI_BURAYA_ID_YAPISTIR",
+			"migrations_dir": "migrations"
+		}
+	]
+}

@@ -14,9 +14,15 @@
 	</p>
 	<h2>Sunucuya ne gider?</h2>
 	<p>
-		Sayfayı açtığında sunucumuz yalnızca günün bulmacasını gönderir. Standart sunucu kayıtları (IP
-		adresi, istek zamanı) barındırma sağlayıcısı tarafından kısa süreli ve güvenlik amaçlı
-		tutulabilir.
+		Sayfayı açtığında sunucumuz yalnızca günün bulmacasını gönderir. Günün bulmacasını bitirdiğinde
+		skorun, kim olduğundan bağımsız olarak anonim bir sayaca eklenir; "bugün ilk %10" gibi
+		sıralamalar bu toplam sayılardan hesaplanır. Standart sunucu kayıtları (IP adresi, istek zamanı)
+		barındırma sağlayıcısı tarafından kısa süreli ve güvenlik amaçlı tutulabilir.
+	</p>
+	<h2>Analitik</h2>
+	<p>
+		Ziyaret sayılarını görmek için çerez kullanmayan, kişiyi izlemeyen Cloudflare Web Analytics
+		kullanıyoruz. Bu araç kişisel veri toplamaz, cihazına hiçbir şey kaydetmez.
 	</p>
 	<h2>Üçüncü taraflar</h2>
 	<p>
@@ -25,7 +31,7 @@
 	</p>
 	<h2>Değişiklikler</h2>
 	<p>
-		İleride analitik gibi bir araç eklersek bu sayfayı güncelleriz. Sorun için:
+		Veri işleyişimiz değişirse bu sayfayı güncelleriz. Sorun ya da merak ettiklerin için:
 		<a href="mailto:iletisim@21kelime.com">iletisim@21kelime.com</a>
 	</p>
 	<p class="updated">Son güncelleme: 12 Temmuz 2026</p>

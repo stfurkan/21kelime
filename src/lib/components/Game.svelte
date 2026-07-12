@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { page } from '$app/state';
 	import { GameEngine, type GameMode } from '$lib/game/engine.svelte';
 	import { fromWire } from '$lib/game/wire';
 	import { istanbulToday } from '$lib/game/daily';
@@ -97,6 +98,19 @@
 	const resuming = $derived(engine.results.length > 0 && engine.phase === 'start');
 	const lastRound = $derived(engine.roundIndex === engine.puzzle.rounds.length - 1);
 
+	// A friend's challenge link (?s=<day>.<score>) shows their score on the
+	// start screen when it points at this exact puzzle.
+	const challengeScore = $derived.by(() => {
+		if (mode !== 'daily') return null;
+		const param = page.url.searchParams.get('s');
+		const match = param?.match(/^(\d+)\.(\d+)$/);
+		if (!match) return null;
+		const [, day, score] = match;
+		if (Number(day) !== puzzle.day) return null;
+		const n = Number(score);
+		return n >= 0 && n <= puzzle.rounds.length ? n : null;
+	});
+
 	// Enter starts the game and skips the between-rounds wait. Playing-phase
 	// keys live in RoundBoard; advance() and start() are phase-guarded, so a
 	// focused button firing the same action twice is harmless.
@@ -125,9 +139,15 @@
 				<p class="sub">21 tur, her turda tüm harflerden bir kelime.</p>
 			{/if}
 
+			{#if challengeScore != null && !resuming}
+				<p class="challenge-note">
+					Arkadaşın bu bulmacada <strong>{challengeScore}/21</strong> yaptı. Geçebilir misin?
+				</p>
+			{/if}
+
 			{#if resuming}
 				<p class="resume-note">
-					Kaldığın yerden: <strong>{engine.results.length}/21</strong> tur oynandı
+					Şu ana kadar <strong>{engine.results.length}/21</strong> tur oynadın.
 				</p>
 				<button class="btn btn-primary big" onclick={() => engine.start(engine.relax)}>
 					Devam et
@@ -149,7 +169,7 @@
 				<p class="between-word bad-word">{trUpper(engine.round.canonical)}</p>
 				{#if engine.round.answers.length > 1}
 					<p class="between-alts">
-						diğer cevaplar: {engine.round.answers
+						Diğer cevaplar: {engine.round.answers
 							.filter((a) => a !== engine.round.canonical)
 							.map(trUpper)
 							.join(', ')}
@@ -236,6 +256,15 @@
 	.resume-note {
 		margin: 0;
 		color: var(--ink-soft);
+	}
+
+	.challenge-note {
+		margin: 0;
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--warn);
+		border-radius: var(--radius);
+		background: var(--warn-soft);
+		font-size: 0.92rem;
 	}
 
 	.between {
