@@ -60,11 +60,21 @@
 
 	let shareState = $state<'idle' | 'copied' | 'challenge-copied' | 'image-downloaded'>('idle');
 	let countdown = $state('');
+	let newPuzzleReady = $state(false);
 
 	$effect(() => {
 		if (!isDaily) return;
+		let lastMs = Infinity;
 		const update = () => {
 			const ms = msUntilNextPuzzle();
+			// The countdown jumping up means Istanbul midnight passed while
+			// this screen was open: the next puzzle is live right now.
+			if (ms > lastMs) {
+				newPuzzleReady = true;
+				clearInterval(handle);
+				return;
+			}
+			lastMs = ms;
 			const h = Math.floor(ms / 3_600_000);
 			const m = Math.floor((ms % 3_600_000) / 60_000);
 			const s = Math.floor((ms % 60_000) / 1000);
@@ -187,7 +197,13 @@
 	{/if}
 
 	{#if isDaily}
-		<p class="next">Yeni bulmaca: <strong>{countdown}</strong></p>
+		{#if newPuzzleReady}
+			<button class="btn btn-primary" onclick={() => location.reload()}>
+				Yeni bulmaca hazır, oyna
+			</button>
+		{:else}
+			<p class="next">Yeni bulmaca: <strong>{countdown}</strong></p>
+		{/if}
 	{/if}
 
 	<details class="answers">

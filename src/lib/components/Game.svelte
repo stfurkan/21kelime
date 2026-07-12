@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { GameEngine, type GameMode } from '$lib/game/engine.svelte';
 	import { fromWire } from '$lib/game/wire';
-	import { istanbulToday } from '$lib/game/daily';
+	import { istanbulToday, dayNumberOf } from '$lib/game/daily';
 	import {
 		loadDayState,
 		saveDayState,
@@ -52,8 +52,12 @@
 		onTick: (index, secondsLeft) => saveProgress(false, { index, secondsLeft }),
 		onFinish: () => {
 			saveProgress(true);
-			// Streaks/stats only count for today's daily puzzle, once.
-			if (mode === 'daily' && puzzle.date === istanbulToday()) {
+			// Streaks/stats count once, for the daily puzzle only. A game
+			// started before midnight and finished just after still counts:
+			// accept today's date or yesterday's (the session's own date).
+			const today = istanbulToday();
+			const startedRecently = puzzle.date === today || dayNumberOf(today) - puzzle.day === 1;
+			if (mode === 'daily' && startedRecently) {
 				const state = loadDayState(puzzle.date);
 				if (state && !state.statsCounted) {
 					const yesterday = dateOfDay(puzzle.day - 1);
