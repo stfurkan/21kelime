@@ -11,6 +11,13 @@
 		status: string;
 	}
 
+	// Newest days first, loaded in batches so the page stays fast even
+	// after years of puzzles (day 1000 would otherwise mean a thousand
+	// rows and a thousand localStorage reads on open).
+	const BATCH = 30;
+
+	let todayNum = $state(0);
+	let shown = $state(BATCH);
 	let entries = $state<Entry[]>([]);
 
 	const fmt = new Intl.DateTimeFormat('tr-TR', {
@@ -22,9 +29,11 @@
 
 	// Built client-side: played-status lives in localStorage.
 	$effect(() => {
-		const todayNum = dayNumberOf(istanbulToday());
+		todayNum = dayNumberOf(istanbulToday());
+		const first = todayNum;
+		const last = Math.max(1, todayNum - shown + 1);
 		const list: Entry[] = [];
-		for (let day = todayNum; day >= 1; day--) {
+		for (let day = first; day >= last; day--) {
 			const date = dateOfDay(day);
 			const saved = loadDayState(date);
 			let status = '';
@@ -35,6 +44,8 @@
 		}
 		entries = list;
 	});
+
+	const remaining = $derived(Math.max(0, todayNum - shown));
 </script>
 
 <svelte:head>
@@ -49,9 +60,7 @@
 <ul class="list">
 	{#each entries as e (e.day)}
 		<li>
-			<a
-				href={e.day === entries[0]?.day ? resolve('/') : resolve('/arsiv/[date]', { date: e.date })}
-			>
+			<a href={e.day === todayNum ? resolve('/') : resolve('/arsiv/[date]', { date: e.date })}>
 				<span class="day">#{e.day}</span>
 				<span class="date">{e.label}</span>
 				<span class="status" class:done={e.status.includes('/21') && !e.status.includes('devam')}>
@@ -61,6 +70,12 @@
 		</li>
 	{/each}
 </ul>
+
+{#if remaining > 0}
+	<button class="btn more" onclick={() => (shown += BATCH)}>
+		Daha eski günleri göster ({remaining} gün kaldı)
+	</button>
+{/if}
 
 <style>
 	h1 {
@@ -115,5 +130,10 @@
 	.status.done {
 		color: var(--good);
 		font-weight: 700;
+	}
+
+	.more {
+		display: block;
+		margin: 1rem auto 0;
 	}
 </style>
