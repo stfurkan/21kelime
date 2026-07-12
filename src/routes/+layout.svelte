@@ -140,8 +140,10 @@
 		color: var(--ink-soft);
 	}
 
-	nav a:hover {
-		color: var(--accent);
+	@media (hover: hover) {
+		nav a:hover {
+			color: var(--accent);
+		}
 	}
 
 	nav button {
@@ -151,8 +153,10 @@
 		padding: 0.2rem;
 	}
 
-	nav button:hover {
-		color: var(--accent);
+	@media (hover: hover) {
+		nav button:hover {
+			color: var(--accent);
+		}
 	}
 
 	main {
@@ -182,7 +186,9 @@
 		color: var(--ink-soft);
 	}
 
-	.legal-links a:hover {
-		color: var(--accent);
+	@media (hover: hover) {
+		.legal-links a:hover {
+			color: var(--accent);
+		}
 	}
 </style>

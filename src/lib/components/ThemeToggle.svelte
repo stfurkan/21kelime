@@ -43,7 +43,9 @@
 		padding: 0.2rem;
 	}
 
-	button:hover {
-		color: var(--accent);
+	@media (hover: hover) {
+		button:hover {
+			color: var(--accent);
+		}
 	}
 </style>

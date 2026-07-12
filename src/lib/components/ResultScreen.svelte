@@ -368,9 +368,11 @@
 		background: var(--bg-raised);
 	}
 
-	.social-btn:hover {
-		color: var(--accent);
-		border-color: var(--accent);
+	@media (hover: hover) {
+		.social-btn:hover {
+			color: var(--accent);
+			border-color: var(--accent);
+		}
 	}
 
 	.share-hint {

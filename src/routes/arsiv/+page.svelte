@@ -108,8 +108,10 @@
 		color: var(--ink);
 	}
 
-	.list a:hover {
-		border-color: var(--accent);
+	@media (hover: hover) {
+		.list a:hover {
+			border-color: var(--accent);
+		}
 	}
 
 	.day {

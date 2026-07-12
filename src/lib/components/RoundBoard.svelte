@@ -343,8 +343,12 @@
 			opacity 0.15s ease;
 	}
 
-	.tile:not(.used):hover {
-		transform: translateY(-2px);
+	/* Touch browsers keep :hover stuck on the last tapped element, so the
+	   lift only applies where a real pointer can hover. */
+	@media (hover: hover) {
+		.tile:not(.used):hover {
+			transform: translateY(-2px);
+		}
 	}
 
 	.tile:active {
