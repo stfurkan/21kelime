@@ -11,17 +11,17 @@ function results(outcomes: string): RoundResult[] {
 }
 
 describe('shareText', () => {
-	it('groups rows by word length with an aligned leading label and breathing room', () => {
+	it('groups rows by word length with a keycap label and breathing room', () => {
 		const text = shareText(5, results('gggggggyyyyyyybbbbbbb'));
 		const lines = text.split('\n');
 		expect(lines[0]).toBe('21kelime #5 14/21');
 		expect(lines[1]).toBe('');
-		expect(lines[2]).toBe('4 🟩🟩🟩');
-		expect(lines[3]).toBe('5 🟩🟩🟩🟩');
-		expect(lines[4]).toBe('6 🟨🟨🟨🟨');
-		expect(lines[5]).toBe('7 🟨🟨🟨⬛');
-		expect(lines[6]).toBe('8 ⬛⬛⬛');
-		expect(lines[7]).toBe('9 ⬛⬛⬛');
+		expect(lines[2]).toBe('4️⃣🟩🟩🟩');
+		expect(lines[3]).toBe('5️⃣🟩🟩🟩🟩');
+		expect(lines[4]).toBe('6️⃣🟨🟨🟨🟨');
+		expect(lines[5]).toBe('7️⃣🟨🟨🟨⬛');
+		expect(lines[6]).toBe('8️⃣⬛⬛⬛');
+		expect(lines[7]).toBe('9️⃣⬛⬛⬛');
 		expect(lines[8]).toBe('');
 		expect(lines[9]).toBe('https://21kelime.com');
 		expect(lines).toHaveLength(10);

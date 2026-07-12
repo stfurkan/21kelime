@@ -1,14 +1,15 @@
 /**
  * Spoiler-free share text. Rows follow the game's length ramp (4 to 9
  * letter words), so the format reads as 21kelime, not as a Wordle clone.
- * The leading word-length digit gives every row a common left edge:
+ * Keycap digits render at the same cell width as the squares, so the
+ * grid stays perfectly aligned in every chat app:
  *
  *   21kelime #12 16/21
  *
- *   4 🟩🟩🟩
- *   5 🟩🟨🟩🟩
+ *   4️⃣🟩🟩🟩
+ *   5️⃣🟩🟨🟩🟩
  *   ...
- *   9 ⬛⬛⬛
+ *   9️⃣⬛⬛⬛
  *   Seri: 5 gün 🔥
  *
  *   https://21kelime.com
@@ -21,6 +22,11 @@ const EMOJI: Record<string, string> = {
 	revealed: '🟨',
 	failed: '⬛'
 };
+
+/** Word length as a keycap emoji (same rendered width as the squares). */
+function keycap(n: number): string {
+	return `${n}️⃣`;
+}
 
 export function scoreOf(results: RoundResult[]): number {
 	return results.filter((r) => r.outcome !== 'failed').length;
@@ -43,7 +49,7 @@ export function shareText(day: number, results: RoundResult[], opts: ShareOption
 			cells += EMOJI[results[j].outcome];
 			j++;
 		}
-		rows.push(len ? `${len} ${cells}` : cells);
+		rows.push(len ? `${keycap(len)}${cells}` : cells);
 		i = j;
 	}
 	const mode = opts.relax ? ' (rahat mod)' : '';
