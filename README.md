@@ -9,21 +9,21 @@ Günlük Türkçe kelime oyunu. Her gün 21 tur: süre dolmadan, karışık harf
 ## Nasıl oynanır?
 
 - Günde **21 tur** var. Kelimeler kısa başlar, gittikçe uzar: ilk turlar 4 harfli, son turlar 9 harfli.
-- Her turun süresi **30 saniye**. Süre biterse o tur yanar ama oyun sürer; gün sonunda skorun X/21 olur.
+- Her turun süresi **30 saniye**. Süre biterse o tur yanar, oyun sonraki turla devam eder; gün sonunda skorun X/21 olur.
 - Günde **3 ipucu** hakkın var. İpucu, cevabın sıradaki harfini senin yerine koyar.
 - Aynı harflerle yazılabilen **bütün sözlük kelimeleri** kabul edilir: cevap elmas diye selam yazdıysan o da doğrudur.
 - Aceleyi sevmiyorsan **rahat modu** aç: süre yok, takıldığın turu geçebilirsin. Paylaşımda "rahat mod" etiketi görünür, gizli saklı yok.
 - Sonucunu spoiler'sız emoji kartıyla paylaşabilir, hikaye boyutunda görsel indirebilir, arkadaşına meydan okuyabilirsin.
 - Kaçırdığın günler **Arşiv**'de seni bekler; bol alıştırma için **Antrenman** var (her seferinde yeni kelimeler). Seri ve istatistikler yalnızca kendi cihazında tutulur.
-- Açık ve koyu tema var; oyun klavyeyle de dokunmatikle de aynı rahatlıkta oynanır.
+- Açık ve koyu tema var; oyun klavyeyle de dokunmatik ekranla da rahatça oynanır.
 - Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır. Birinci gün 2026-07-12; bu tarihi [src/lib/game/daily.ts](src/lib/game/daily.ts) içindeki `EPOCH_DATE` belirler.
 
 ## Nasıl çalışır?
 
-- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde koşar.
-- Sözlük istemciye hiç gitmez. Tarayıcıya yalnızca günün turları iner, cevaplar da hafifçe şifrelidir. Yarının bulmacasını isteyen 404 alır.
+- **SvelteKit 2 + Svelte 5 (runes)**, TypeScript, Vite 8, Vitest 4. Cloudflare Workers üzerinde çalışır.
+- Sözlük istemciye hiç gitmez. Tarayıcıya yalnızca günün turları iner, cevaplar da hafifçe şifrelenmiştir. Yarının bulmacasını isteyen 404 alır.
 - Bulmacalar deterministiktir: kelime havuzları derleme sırasında sabit bir tohumla bir kez karıştırılır, her gün havuzdan sırayla çekilir. Veritabanı yoktur; dünyanın neresinde olursan ol herkes aynı bulmacayı çözer.
-- İşin en nazik kısmı Türkçe: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı harfler sadeleşir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
+- En hassas kısım Türkçe'nin kendisi: bütün harf işlemleri `tr-TR` locale ile yapılır (İ/i ve I/ı ayrımı), şapkalı harfler sadeleştirilir (kâr = kar), klavye girişi hem Q hem F düzeninde çalışır.
 
 ## Geliştirme
 
@@ -37,7 +37,7 @@ npm run lint           # prettier + eslint
 
 ### Kelime verisi
 
-Kelimeler iki açık kaynaktan derlenir: Zemberek-NLP sözlükleri (TDK madde başları) ve FrequencyWords sıklık listesi. Veriyi yeniden üretmek istersen:
+Kelimeler iki açık kaynaktan alınmıştır: Zemberek-NLP sözlükleri (TDK madde başlıkları) ve FrequencyWords sıklık listesi. Veriyi yeniden üretmek istersen:
 
 ```bash
 ./scripts/fetch-data.sh           # ham verileri indirir
@@ -60,7 +60,7 @@ npm run test:e2e                   # ayrı bir terminalde
 
 ## Yayınlama
 
-Cloudflare Workers'a tek komutla çıkar:
+Cloudflare Workers'a yayınlamak için iki komut yeter:
 
 ```bash
 npm run build
@@ -73,4 +73,4 @@ GitHub'a bağlayıp otomatik dağıtım da kurabilirsin: Cloudflare panelinde Wo
 
 - Kod: MIT.
 - Kelime verileri: [Zemberek-NLP](https://github.com/ahmetaa/zemberek-nlp) sözlükleri (Apache-2.0) ve [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (MIT).
-- Oyun fikri [18words.com](https://18words.com)'dan ilham aldı; Türkçe için sıfırdan tasarlanıp yazıldı.
+- Oyun, [18words.com](https://18words.com)'dan ilham alınarak Türkçe için sıfırdan tasarlandı ve yazıldı.

@@ -14,13 +14,14 @@
 			<li>
 				<span class="li-icon"><Icon name="clock" size={16} /></span>
 				<span
-					>Her tur için <strong>30 saniyen</strong> var. Süre dolarsa tur yanar, oyun sonraki turla sürer.</span
+					>Her tur için <strong>30 saniyen</strong> var. Süre dolarsa tur yanar, oyun sonraki turla devam
+					eder.</span
 				>
 			</li>
 			<li>
 				<span class="li-icon"><Icon name="check" size={16} /></span>
 				<span
-					>Harflere dokun ya da klavyeyle yaz. Kelime tamamlanınca kendiliğinden kontrol edilir.</span
+					>Harflere dokun ya da klavyeyle yaz. Kelime tamamlanınca otomatik olarak kontrol edilir.</span
 				>
 			</li>
 			<li>
@@ -49,7 +50,8 @@
 		</p>
 		<p>
 			Aynı harflerle yazılabilen <em>her</em> sözlük kelimesi kabul edilir; örneğin
-			<strong>elmas</strong> ve <strong>selam</strong>. Kelimeler TDK madde başlarından derlenir.
+			<strong>elmas</strong> ve <strong>selam</strong>. Kelimeler TDK madde başlıklarından
+			alınmıştır.
 		</p>
 		<p class="soft">Yeni bulmaca her gece yarısı Türkiye saatiyle yayınlanır.</p>
 	</div>

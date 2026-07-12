@@ -13,9 +13,9 @@
 	</p>
 	<h2>Kelime listesi</h2>
 	<p>
-		Kelimeler TDK madde başlarını temel alan açık kaynaklardan derlenmiştir: Zemberek-NLP sözlükleri
-		(Apache-2.0) ve FrequencyWords sıklık listesi (MIT). Bir kelimenin listede olması veya olmaması
-		editoryal bir tercihtir; öneri ve itirazları memnuniyetle dinleriz.
+		Kelimeler TDK madde başlıklarını temel alan açık kaynaklardan alınmıştır: Zemberek-NLP
+		sözlükleri (Apache-2.0) ve FrequencyWords sıklık listesi (MIT). Bir kelimenin listede olup
+		olmaması editoryal bir tercihtir; öneri ve itirazları memnuniyetle dinleriz.
 	</p>
 	<h2>Fikri haklar</h2>
 	<p>
