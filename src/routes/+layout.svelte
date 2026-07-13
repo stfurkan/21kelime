@@ -24,7 +24,8 @@
 			applicationCategory: 'GameApplication',
 			operatingSystem: 'Web',
 			inLanguage: 'tr',
-			description: 'Her gün 21 tur: karışık harflerden, tüm harfleri kullanarak kelimeyi bul.',
+			description:
+				'Her gün 21 tur: süre dolmadan, karışık harflerin hepsini kullanıp geçerli bir kelime bulmalısın.',
 			offers: { '@type': 'Offer', price: '0', priceCurrency: 'TRY' }
 		}) +
 		'<' +
@@ -37,12 +38,12 @@
 	<title>21kelime | Günlük Türkçe Kelime Oyunu</title>
 	<meta
 		name="description"
-		content="Her gün 21 kelime: karışık harflerden kelimeyi bul! Türkçe günlük kelime bulmaca oyunu."
+		content="Günlük Türkçe kelime oyunu. Her gün 21 tur: süre dolmadan, karışık harflerin hepsini kullanıp geçerli bir kelime bulmalısın."
 	/>
 	<meta property="og:title" content="21kelime | Günlük Türkçe Kelime Oyunu" />
 	<meta
 		property="og:description"
-		content="Her gün 21 tur: karışık harflerden, tüm harfleri kullanarak kelimeyi bul. Süreye karşı!"
+		content="Her gün 21 tur: süre dolmadan, karışık harflerin hepsini kullanıp geçerli bir kelime bulmalısın."
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://21kelime.com" />

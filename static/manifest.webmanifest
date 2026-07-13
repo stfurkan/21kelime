@@ -1,7 +1,7 @@
 {
-	"name": "21kelime — Günlük Türkçe Kelime Oyunu",
+	"name": "21kelime | Günlük Türkçe Kelime Oyunu",
 	"short_name": "21kelime",
-	"description": "Her gün 21 kelime: karışık harflerden kelimeyi bul!",
+	"description": "Her gün 21 tur: süre dolmadan, karışık harflerin hepsini kullanıp geçerli bir kelime bulmalısın.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#faf7f2",
