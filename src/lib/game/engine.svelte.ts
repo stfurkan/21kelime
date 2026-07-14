@@ -185,6 +185,16 @@ export class GameEngine {
 		if (last !== undefined) this.tiles[last].used = false;
 	}
 
+	/** Tap a typed slot: take back that letter and everything after it. */
+	eraseFrom(typedIdx: number): void {
+		if (this.phase !== 'playing' || this.paused) return;
+		this.flushPendingWrong();
+		while (this.inputTileIndices.length > typedIdx) {
+			const last = this.inputTileIndices.pop();
+			if (last !== undefined) this.tiles[last].used = false;
+		}
+	}
+
 	/**
 	 * If a wrong guess is waiting for its delayed clear, run the clear now so
 	 * the very next tap/keystroke acts on an empty word instead of being

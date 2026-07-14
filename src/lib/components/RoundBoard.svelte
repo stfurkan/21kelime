@@ -121,14 +121,23 @@
 		</p>
 
 		{#key engine.wrongShake}
-			<div
-				class="slots"
-				class:shake={engine.wrongShake > 0}
-				style="--n: {engine.wordLength}"
-				aria-hidden="true"
-			>
+			<div class="slots" class:shake={engine.wrongShake > 0} style="--n: {engine.wordLength}">
 				{#each slots as slot, i (i)}
-					<div class="slot {slot.kind}">{slot.letter ? trUpper(slot.letter) : ''}</div>
+					{#if slot.kind === 'typed'}
+						<!-- Tapping a typed letter takes it and everything after it back. -->
+						<button
+							class="slot typed"
+							onclick={() => engine.eraseFrom(i - engine.revealedCount)}
+							title="Bu harfi ve sonrasını geri al"
+							aria-label={`${trUpper(slot.letter)} harfini ve sonrasını geri al`}
+						>
+							{trUpper(slot.letter)}
+						</button>
+					{:else}
+						<div class="slot {slot.kind}" aria-hidden="true">
+							{slot.letter ? trUpper(slot.letter) : ''}
+						</div>
+					{/if}
 				{/each}
 			</div>
 		{/key}
@@ -291,6 +300,18 @@
 
 	.slot.typed {
 		border-bottom-color: var(--accent);
+	}
+
+	/* Signal that typed letters are tappable: they take themselves back. */
+	@media (hover: hover) {
+		.slot.typed:hover {
+			color: var(--bad);
+			border-bottom-color: var(--bad);
+		}
+	}
+
+	.slot.typed:active {
+		transform: scale(0.92);
 	}
 
 	.shake {

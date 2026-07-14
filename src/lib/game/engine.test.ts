@@ -60,6 +60,36 @@ describe('GameEngine', () => {
 		expect(engine.currentWord).toBe('');
 	});
 
+	it('tapping a typed letter takes it and everything after it back', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		typeWord(engine, 'eve');
+		expect(engine.currentWord).toBe('eve');
+		engine.eraseFrom(1);
+		expect(engine.currentWord).toBe('e');
+		// The freed tiles are available again and the round still completes.
+		typeWord(engine, 'vet');
+		expect(engine.results[0].outcome).toBe('solved');
+	});
+
+	it('tapping the last typed letter takes back only that letter', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		typeWord(engine, 'ev');
+		engine.eraseFrom(1);
+		expect(engine.currentWord).toBe('e');
+	});
+
+	it('eraseFrom never touches revealed letters', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		engine.reveal();
+		engine.typeLetter('v');
+		expect(engine.currentWord).toBe('ev');
+		engine.eraseFrom(0);
+		expect(engine.currentWord).toBe('e');
+	});
+
 	it('fails the round when the timer runs out', () => {
 		const engine = freshEngine();
 		engine.start(false);
