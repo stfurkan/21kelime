@@ -17,11 +17,11 @@ const CLIENT_DIR = join(ROOT, '.svelte-kit', 'cloudflare', '_app');
 const words = JSON.parse(
 	readFileSync(join(ROOT, 'src', 'lib', 'puzzles', 'data', 'words.json'), 'utf8')
 );
-const pool9: string[] = words.pools['9'];
+const pool9 = words.pools['9'];
 // Spread samples across the pool; 9-letter lemmas never appear in UI copy.
 const sentinels = [0, 0.25, 0.5, 0.75, 0.99].map((p) => pool9[Math.floor(p * (pool9.length - 1))]);
 
-function* walk(dir: string): Generator<string> {
+function* walk(dir) {
 	for (const name of readdirSync(dir)) {
 		const path = join(dir, name);
 		if (statSync(path).isDirectory()) yield* walk(path);

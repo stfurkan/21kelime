@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build && node scripts/check-client-bundle.ts",
+		"build": "vite build && node scripts/check-client-bundle.mjs",
 		"build:mobile": "BUILD_TARGET=mobile vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
