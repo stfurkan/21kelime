@@ -1,0 +1,4 @@
+# Served by Cloudflare's static asset layer. The mobile apps read the
+# data version cross-origin to decide local vs server puzzles.
+/data-version.json
+  Access-Control-Allow-Origin: *
