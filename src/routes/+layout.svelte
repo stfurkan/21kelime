@@ -138,6 +138,30 @@
 		gap: 0.9rem;
 	}
 
+	/* Narrow phones (360dp Androids): tighten the header so all controls
+	   stay on screen. */
+	@media (max-width: 400px) {
+		.app {
+			padding: 0 0.75rem;
+		}
+
+		header {
+			gap: 0.7rem;
+		}
+
+		.logo {
+			font-size: 1.1rem;
+		}
+
+		nav {
+			gap: 0.5rem;
+		}
+
+		nav a {
+			font-size: 0.84rem;
+		}
+	}
+
 	nav a {
 		font-weight: 600;
 		font-size: 0.92rem;
