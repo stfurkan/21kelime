@@ -19,6 +19,7 @@
 		"test:e2e": "node scripts/e2e-gameplay.ts && node scripts/e2e-result.ts"
 	},
 	"devDependencies": {
+		"@capacitor/cli": "^8.4.2",
 		"@eslint/js": "^10.0.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.9",
 		"@sveltejs/adapter-static": "^3.0.10",
@@ -41,5 +42,19 @@
 	},
 	"engines": {
 		"node": ">=22"
+	},
+	"dependencies": {
+		"@capacitor/android": "^8.4.2",
+		"@capacitor/app": "^8.1.1",
+		"@capacitor/core": "^8.4.2",
+		"@capacitor/filesystem": "^8.1.2",
+		"@capacitor/haptics": "^8.0.2",
+		"@capacitor/ios": "^8.4.2",
+		"@capacitor/share": "^8.0.1",
+		"@capacitor/status-bar": "^8.0.3"
+	},
+	"allowScripts": {
+		"sharp@0.34.5": true,
+		"sharp@0.32.6": true
 	}
 }

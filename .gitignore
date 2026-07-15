@@ -9,6 +9,13 @@ node_modules
 /build
 /build-mobile
 
+# Capacitor: web assets copied by `cap sync` (regenerated every build)
+android/app/src/main/assets/public
+android/app/src/main/assets/capacitor.config.json
+ios/App/App/public
+ios/App/App/capacitor.config.json
+ios/App/Pods
+
 # OS
 .DS_Store
 Thumbs.db

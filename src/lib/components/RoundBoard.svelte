@@ -2,6 +2,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { SECONDS_PER_ROUND } from '$lib/game/generate';
 	import { trUpper } from '$lib/words/normalize';
+	import { hapticTap } from '$lib/native';
 	import Icon from './Icon.svelte';
 
 	let { engine }: { engine: GameEngine } = $props();
@@ -127,7 +128,10 @@
 						<!-- Tapping a typed letter takes it and everything after it back. -->
 						<button
 							class="slot typed"
-							onclick={() => engine.eraseFrom(i - engine.revealedCount)}
+							onclick={() => {
+								hapticTap();
+								engine.eraseFrom(i - engine.revealedCount);
+							}}
 							title="Bu harfi ve sonrasını geri al"
 							aria-label={`${trUpper(slot.letter)} harfini ve sonrasını geri al`}
 						>
@@ -147,7 +151,10 @@
 				<button
 					class="tile"
 					class:used={tile.used}
-					onclick={() => engine.pickTile(i)}
+					onclick={() => {
+						hapticTap();
+						engine.pickTile(i);
+					}}
 					disabled={tile.used}
 					aria-label={`Harf ${trUpper(tile.letter)}`}
 				>

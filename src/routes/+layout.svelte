@@ -8,11 +8,14 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { pruneOldDayStates } from '$lib/game/storage';
+	import { initNative } from '$lib/native';
 
 	let { children } = $props();
 
 	// Housekeeping: cap localStorage growth from years of daily play.
 	$effect(() => pruneOldDayStates());
+	// No-op on the web; wires back button, status bar and haptics in the app.
+	$effect(() => void initNative());
 
 	const jsonLd =
 		'<script type="application/ld+json">' +

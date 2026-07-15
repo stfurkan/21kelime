@@ -153,12 +153,21 @@ if (process.argv.includes('--report')) {
 	}
 }
 
+// Bump on ANY word data change: installed apps compare this against the
+// site's /data-version.json and defer to the server when they differ.
+const DATA_VERSION = 1;
+
 mkdirSync(OUT_DIR, { recursive: true });
 const out = {
-	version: 1,
+	version: DATA_VERSION,
 	sources: 'zemberek-nlp (Apache-2.0) master+non-tdk; hermitdave/FrequencyWords (MIT)',
 	validation: [...validation].sort(),
 	pools
 };
 writeFileSync(join(OUT_DIR, 'words.json'), JSON.stringify(out));
+writeFileSync(
+	join(ROOT, 'static', 'data-version.json'),
+	JSON.stringify({ version: DATA_VERSION }) + '\n'
+);
 console.log(`wrote ${join(OUT_DIR, 'words.json')} (${validation.size} validation words)`);
+console.log(`wrote static/data-version.json (version ${DATA_VERSION})`);

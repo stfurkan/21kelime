@@ -66,6 +66,16 @@ export function challengeText(day: number, results: RoundResult[]): string {
 }
 
 export async function share(text: string): Promise<'shared' | 'copied' | 'failed'> {
+	if (__MOBILE__) {
+		// The Capacitor WebView has no navigator.share; use the native sheet.
+		try {
+			const { nativeShareText } = await import('$lib/native');
+			await nativeShareText(text);
+			return 'shared';
+		} catch {
+			return 'failed'; // sheet dismissed
+		}
+	}
 	if (typeof navigator !== 'undefined' && 'share' in navigator) {
 		try {
 			await navigator.share({ text });

@@ -171,6 +171,23 @@ export async function renderResultImage(opts: ImageOptions): Promise<Blob> {
 export async function shareResultImage(opts: ImageOptions): Promise<'shared' | 'downloaded'> {
 	const blob = await renderResultImage(opts);
 	const file = new File([blob], `21kelime-${opts.day}.png`, { type: 'image/png' });
+	if (__MOBILE__) {
+		// The Capacitor WebView can neither navigator.share nor download;
+		// hand the PNG to the native sheet through a temp file.
+		const dataUrl = await new Promise<string>((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result as string);
+			reader.onerror = () => reject(new Error('read failed'));
+			reader.readAsDataURL(blob);
+		});
+		const { nativeSharePng } = await import('$lib/native');
+		try {
+			await nativeSharePng(dataUrl, file.name);
+		} catch {
+			// Sheet dismissed: nothing else to do inside the app.
+		}
+		return 'shared';
+	}
 	const isTouch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
 	if (isTouch && navigator.canShare?.({ files: [file] })) {
 		try {

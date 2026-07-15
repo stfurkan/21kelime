@@ -11,3 +11,8 @@ bun.lockb
 # generated data
 src/lib/puzzles/data/
 data/raw/
+
+# Capacitor native projects (generated)
+/android/
+/ios/
+/build-mobile/
