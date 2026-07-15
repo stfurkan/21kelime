@@ -1,8 +1,16 @@
 import { defineConfig } from 'vitest/config';
-import adapter from '@sveltejs/adapter-cloudflare';
+import adapterCloudflare from '@sveltejs/adapter-cloudflare';
+import adapterStatic from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 
+// BUILD_TARGET=mobile produces the static SPA that Capacitor wraps; the
+// default build stays the Cloudflare Workers site.
+const mobile = process.env.BUILD_TARGET === 'mobile';
+
 export default defineConfig({
+	define: {
+		__MOBILE__: JSON.stringify(mobile)
+	},
 	plugins: [
 		sveltekit({
 			compilerOptions: {
@@ -11,7 +19,14 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 
-			adapter: adapter()
+			adapter: mobile
+				? adapterStatic({
+						pages: 'build-mobile',
+						assets: 'build-mobile',
+						fallback: 'index.html',
+						strict: false
+					})
+				: adapterCloudflare()
 		})
 	],
 	test: {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import wordData from '../server/data/words.json';
+import wordData from '../puzzles/data/words.json';
 import { buildSignatureIndex, signatureOf } from '../words/signature.ts';
 import { ROUND_PLAN, generatePuzzle, toWire } from './generate.ts';
 import { fromWire } from './wire.ts';

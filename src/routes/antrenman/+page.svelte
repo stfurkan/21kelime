@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Game from '$lib/components/Game.svelte';
+	import { loadPractice } from '$lib/puzzles/client';
 	import type { WirePuzzle } from '$lib/game/types';
 
 	let wire = $state<WirePuzzle | null>(null);
@@ -10,9 +11,9 @@
 		wire = null;
 		failed = false;
 		try {
-			const res = await fetch('/api/practice');
-			if (!res.ok) throw new Error();
-			wire = await res.json();
+			const next = await loadPractice(fetch);
+			if (!next) throw new Error();
+			wire = next;
 			generation += 1;
 		} catch {
 			failed = true;

@@ -8,7 +8,7 @@
  *   - first-10K               Zemberek-NLP 10k most frequent Turkish surface forms
  *
  * Outputs:
- *   - src/lib/server/data/words.json  { validation: string[], pools: Record<len, string[]> }
+ *   - src/lib/puzzles/data/words.json  { validation: string[], pools: Record<len, string[]> }
  *
  * Run: node scripts/build-words.ts [--report]
  */
@@ -20,7 +20,7 @@ import { hashSeed, mulberry32, shuffleInPlace } from '../src/lib/game/rng.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const RAW = join(ROOT, 'data', 'raw');
-const OUT_DIR = join(ROOT, 'src', 'lib', 'server', 'data');
+const OUT_DIR = join(ROOT, 'src', 'lib', 'puzzles', 'data');
 
 const TARGET_MIN = 4;
 const TARGET_MAX = 9;
