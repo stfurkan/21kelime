@@ -112,6 +112,13 @@
 	const resuming = $derived(
 		(engine.results.length > 0 || hasPendingClock) && engine.phase === 'start'
 	);
+
+	// Returning players see their numbers on the start screen. Read after
+	// mount so server-rendered HTML stays identical for everyone.
+	let quickStats = $state<ReturnType<typeof loadStats> | null>(null);
+	$effect(() => {
+		if (mode === 'daily') quickStats = loadStats();
+	});
 	const lastRound = $derived(engine.roundIndex === engine.puzzle.rounds.length - 1);
 
 	// A friend's challenge link (?s=<day>.<score>) shows their score on the
@@ -161,6 +168,23 @@
 				<p class="challenge-note">
 					Arkadaşın bu bulmacada <strong>{challengeScore}/21</strong> yaptı. Geçebilir misin?
 				</p>
+			{/if}
+
+			{#if quickStats && quickStats.gamesPlayed > 0}
+				<div class="quick-stats">
+					<div class="qstat">
+						<strong>{quickStats.currentStreak}</strong>
+						<span>gün seri</span>
+					</div>
+					<div class="qstat">
+						<strong>{quickStats.bestScore}<em>/21</em></strong>
+						<span>en iyi skor</span>
+					</div>
+					<div class="qstat">
+						<strong>{quickStats.gamesPlayed}</strong>
+						<span>oyun</span>
+					</div>
+				</div>
 			{/if}
 
 			{#if resuming}
@@ -229,7 +253,45 @@
 		align-items: center;
 		gap: 1rem;
 		text-align: center;
-		padding-top: 2.2rem;
+		/* Center in the free space, nudged up so it never hugs the footer. */
+		margin: auto 0;
+		padding: 1.2rem 0 10vh;
+	}
+
+	.quick-stats {
+		display: flex;
+		gap: 0.6rem;
+		margin-top: 0.2rem;
+	}
+
+	.qstat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.1rem;
+		min-width: 5.2rem;
+		padding: 0.6rem 0.9rem;
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		background: var(--bg-raised);
+	}
+
+	.qstat strong {
+		font-size: 1.25rem;
+		font-weight: 800;
+		line-height: 1.1;
+	}
+
+	.qstat strong em {
+		font-style: normal;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--ink-soft);
+	}
+
+	.qstat span {
+		font-size: 0.72rem;
+		color: var(--ink-soft);
 	}
 
 	h1 {
