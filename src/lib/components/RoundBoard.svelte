@@ -178,6 +178,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+		/* Center the play block in the free space, nudged slightly up.
+		   Height is constant within a round, and the between-round screen
+		   interrupts anyway, so nothing shifts mid-interaction. */
+		margin: auto 0;
+		padding-bottom: 5vh;
 	}
 
 	.topbar {
