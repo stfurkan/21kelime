@@ -2,7 +2,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { SECONDS_PER_ROUND } from '$lib/game/generate';
 	import { trUpper } from '$lib/words/normalize';
-	import { hapticTap } from '$lib/native';
+	import { hapticTap, hapticOutcome } from '$lib/native';
 	import Icon from './Icon.svelte';
 
 	let { engine }: { engine: GameEngine } = $props();
@@ -29,6 +29,11 @@
 			}
 		}
 		return out;
+	});
+
+	// A wrong full word shakes the board; give it a matching buzz in the app.
+	$effect(() => {
+		if (engine.wrongShake > 0) hapticOutcome('error');
 	});
 
 	function onKeydown(e: KeyboardEvent) {

@@ -13,6 +13,7 @@
 	} from '$lib/game/storage';
 	import { dateOfDay } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
+	import { hapticOutcome } from '$lib/native';
 	import type { WirePuzzle } from '$lib/game/types';
 	import RoundBoard from './RoundBoard.svelte';
 	import ResultScreen from './ResultScreen.svelte';
@@ -112,6 +113,14 @@
 	const resuming = $derived(
 		(engine.results.length > 0 || hasPendingClock) && engine.phase === 'start'
 	);
+
+	// Round outcome feedback in the app: success buzz on a solve, error
+	// buzz when the clock ran out (wrong guesses buzz in RoundBoard).
+	$effect(() => {
+		if (engine.phase === 'between') {
+			hapticOutcome(engine.lastOutcome === 'failed' ? 'error' : 'success');
+		}
+	});
 
 	// Returning players see their numbers on the start screen. Read after
 	// mount so server-rendered HTML stays identical for everyone.

@@ -6,6 +6,7 @@
 	import HelpModal from '$lib/components/HelpModal.svelte';
 	import StatsModal from '$lib/components/StatsModal.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import TabBar from '$lib/components/TabBar.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { pruneOldDayStates } from '$lib/game/storage';
 	import { initNative } from '$lib/native';
@@ -66,15 +67,17 @@
 			<span class="logo-num">21</span><span class="logo-word">kelime</span>
 		</a>
 		<nav>
-			<a href={resolve('/arsiv')}>Arşiv</a>
-			<a href={resolve('/antrenman')}>Antrenman</a>
-			<button
-				onclick={() => (ui.statsOpen = true)}
-				title="İstatistikler"
-				aria-label="İstatistikler"
-			>
-				<Icon name="stats" />
-			</button>
+			{#if !__MOBILE__}
+				<a href={resolve('/arsiv')}>Arşiv</a>
+				<a href={resolve('/antrenman')}>Antrenman</a>
+				<button
+					onclick={() => (ui.statsOpen = true)}
+					title="İstatistikler"
+					aria-label="İstatistikler"
+				>
+					<Icon name="stats" />
+				</button>
+			{/if}
 			<button
 				onclick={() => (ui.helpOpen = true)}
 				title="Nasıl oynanır?"
@@ -86,17 +89,21 @@
 		</nav>
 	</header>
 
-	<main>
+	<main class:with-tabbar={__MOBILE__}>
 		{@render children()}
 	</main>
 
-	<footer>
-		<span>Her gece yarısı yeni bulmaca (TSİ)</span>
-		<nav class="legal-links">
-			<a href={resolve('/gizlilik')}>Gizlilik</a>
-			<a href={resolve('/kullanim-kosullari')}>Koşullar</a>
-		</nav>
-	</footer>
+	{#if !__MOBILE__}
+		<footer>
+			<span>Her gece yarısı yeni bulmaca (TSİ)</span>
+			<nav class="legal-links">
+				<a href={resolve('/gizlilik')}>Gizlilik</a>
+				<a href={resolve('/kullanim-kosullari')}>Koşullar</a>
+			</nav>
+		</footer>
+	{:else}
+		<TabBar />
+	{/if}
 </div>
 
 <HelpModal />
@@ -192,6 +199,11 @@
 		display: flex;
 		flex-direction: column;
 		padding: 1rem 0 2rem;
+	}
+
+	/* App builds: keep content clear of the fixed bottom tab bar. */
+	main.with-tabbar {
+		padding-bottom: calc(4.4rem + env(safe-area-inset-bottom));
 	}
 
 	footer {

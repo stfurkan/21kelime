@@ -104,6 +104,14 @@ a {
 	-webkit-tap-highlight-color: transparent;
 }
 
+/* Native app shell (class set by initNative in Capacitor builds only):
+   kill the web tells — rubber-band scroll and long-press selection. */
+:root.native body {
+	overscroll-behavior: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
 a {
 	color: var(--accent);
 	text-decoration: none;

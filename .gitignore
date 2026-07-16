@@ -14,6 +14,13 @@ android/keystore.properties
 *.jks
 *.keystore
 
+# Native build outputs (also keeps eslint out of generated code)
+android/app/build/
+android/build/
+android/.gradle/
+ios/App/build/
+ios/App/DerivedData/
+
 # Capacitor: web assets copied by `cap sync` (regenerated every build)
 android/app/src/main/assets/public
 android/app/src/main/assets/capacitor.config.json

@@ -3,6 +3,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { shareText, challengeText, share, scoreOf } from '$lib/game/share';
 	import { shareResultImage } from '$lib/game/resultImage';
+	import { openExternal } from '$lib/native';
 	import { ROUND_PLAN } from '$lib/game/generate';
 	import { loadStats } from '$lib/game/storage';
 	import { msUntilNextPuzzle, istanbulToday } from '$lib/game/daily';
@@ -218,7 +219,14 @@
 					<a
 						href="https://sozluk.gov.tr/?ara={round.canonical}"
 						target="_blank"
-						rel="noopener noreferrer">{trUpper(round.canonical)}</a
+						rel="noopener noreferrer"
+						onclick={(e) => {
+							// In the app, open the dictionary in the in-app sheet.
+							if (__MOBILE__) {
+								e.preventDefault();
+								openExternal(`https://sozluk.gov.tr/?ara=${round.canonical}`);
+							}
+						}}>{trUpper(round.canonical)}</a
 					>
 					{#if round.answers.length > 1}
 						<span class="alts"

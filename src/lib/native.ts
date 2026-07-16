@@ -11,6 +11,8 @@ const BAR_BG = { light: '#faf7f2', dark: '#14110e' } as const;
 /** One-time app setup: back button, status bar, theme observer. */
 export async function initNative(): Promise<void> {
 	if (!__MOBILE__) return;
+	// Native feel: no rubber-band overscroll, no long-press text selection.
+	document.documentElement.classList.add('native');
 	const { App } = await import('@capacitor/app');
 	// Android hardware back: navigate back in history; at the root,
 	// background the app instead of killing it mid-round.
@@ -48,6 +50,28 @@ export function hapticTap(): void {
 	hapticsModule
 		.then(({ Haptics, ImpactStyle }) => Haptics.impact({ style: ImpactStyle.Light }))
 		.catch(() => {});
+}
+
+/** Success/failure feedback on round outcomes; fire and forget. */
+export function hapticOutcome(kind: 'success' | 'error'): void {
+	if (!__MOBILE__) return;
+	hapticsModule ??= import('@capacitor/haptics');
+	hapticsModule
+		.then(({ Haptics, NotificationType }) =>
+			Haptics.notification({
+				type: kind === 'success' ? NotificationType.Success : NotificationType.Error
+			})
+		)
+		.catch(() => {});
+}
+
+/**
+ * Open an external page in the in-app browser sheet (SFSafariViewController
+ * on iOS, Custom Tabs on Android) instead of leaving the app.
+ */
+export function openExternal(url: string): void {
+	if (!__MOBILE__) return;
+	import('@capacitor/browser').then(({ Browser }) => Browser.open({ url })).catch(() => {});
 }
 
 /** Share plain text through the native sheet. */

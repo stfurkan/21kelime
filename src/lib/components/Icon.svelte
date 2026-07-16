@@ -15,7 +15,10 @@
 		| 'clock'
 		| 'no-timer'
 		| 'arrow-right'
-		| 'skip';
+		| 'skip'
+		| 'today'
+		| 'archive'
+		| 'target';
 
 	// Stroke-based, lucide-style paths on a 24x24 grid.
 	const PATHS: Record<IconName, string> = {
@@ -36,7 +39,13 @@
 		'no-timer':
 			'<circle cx="12" cy="13" r="8.2"/><path d="M9.5 2.2h5M12 9.5V13"/><path d="m4 5.5 15.5 15"/>',
 		'arrow-right': '<path d="M4 12h16M13 5l7 7-7 7"/>',
-		skip: '<path d="M5 5.5v13l9-6.5z" fill="currentColor" stroke-linejoin="round"/><path d="M18 5.5v13"/>'
+		skip: '<path d="M5 5.5v13l9-6.5z" fill="currentColor" stroke-linejoin="round"/><path d="M18 5.5v13"/>',
+		today:
+			'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M8 3v4M16 3v4M3.5 10.5h17"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>',
+		archive:
+			'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13.5h4"/>',
+		target:
+			'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>'
 	};
 </script>
 
