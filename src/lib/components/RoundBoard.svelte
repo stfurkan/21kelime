@@ -126,55 +126,57 @@
 			{engine.currentWord ? trUpper(engine.currentWord) : ''}
 		</p>
 
-		{#key engine.wrongShake}
-			<div class="slots" class:shake={engine.wrongShake > 0} style="--n: {engine.wordLength}">
-				{#each slots as slot, i (i)}
-					{#if slot.kind === 'typed'}
-						<!-- Tapping a typed letter takes it and everything after it back. -->
-						<button
-							class="slot typed"
-							onclick={() => {
-								hapticTap();
-								engine.eraseFrom(i - engine.revealedCount);
-							}}
-							title="Bu harfi ve sonrasını geri al"
-							aria-label={`${trUpper(slot.letter)} harfini ve sonrasını geri al`}
-						>
-							{trUpper(slot.letter)}
-						</button>
-					{:else}
-						<div class="slot {slot.kind}" aria-hidden="true">
-							{slot.letter ? trUpper(slot.letter) : ''}
-						</div>
-					{/if}
+		<div class="play">
+			{#key engine.wrongShake}
+				<div class="slots" class:shake={engine.wrongShake > 0} style="--n: {engine.wordLength}">
+					{#each slots as slot, i (i)}
+						{#if slot.kind === 'typed'}
+							<!-- Tapping a typed letter takes it and everything after it back. -->
+							<button
+								class="slot typed"
+								onclick={() => {
+									hapticTap();
+									engine.eraseFrom(i - engine.revealedCount);
+								}}
+								title="Bu harfi ve sonrasını geri al"
+								aria-label={`${trUpper(slot.letter)} harfini ve sonrasını geri al`}
+							>
+								{trUpper(slot.letter)}
+							</button>
+						{:else}
+							<div class="slot {slot.kind}" aria-hidden="true">
+								{slot.letter ? trUpper(slot.letter) : ''}
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{/key}
+
+			<div class="rack" style="--n: {engine.tiles.length}">
+				{#each engine.tiles as tile, i (i)}
+					<button
+						class="tile"
+						class:used={tile.used}
+						onclick={() => {
+							hapticTap();
+							engine.pickTile(i);
+						}}
+						disabled={tile.used}
+						aria-label={`Harf ${trUpper(tile.letter)}`}
+					>
+						{trUpper(tile.letter)}
+					</button>
 				{/each}
 			</div>
-		{/key}
 
-		<div class="rack" style="--n: {engine.tiles.length}">
-			{#each engine.tiles as tile, i (i)}
-				<button
-					class="tile"
-					class:used={tile.used}
-					onclick={() => {
-						hapticTap();
-						engine.pickTile(i);
-					}}
-					disabled={tile.used}
-					aria-label={`Harf ${trUpper(tile.letter)}`}
-				>
-					{trUpper(tile.letter)}
-				</button>
-			{/each}
+			<button
+				class="erase"
+				onclick={() => engine.backspace()}
+				disabled={engine.inputTileIndices.length === 0}
+			>
+				<Icon name="backspace" size={17} /> Sil
+			</button>
 		</div>
-
-		<button
-			class="erase"
-			onclick={() => engine.backspace()}
-			disabled={engine.inputTileIndices.length === 0}
-		>
-			<Icon name="backspace" size={17} /> Sil
-		</button>
 	{/if}
 </div>
 
@@ -183,11 +185,16 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		/* Center the play block in the free space, nudged slightly up.
-		   Height is constant within a round, and the between-round screen
-		   interrupts anyway, so nothing shifts mid-interaction. */
+		/* Status (counter, timer, controls) stays pinned at the top where
+		   it is glanceable; the play surface centers in the rest. */
+		flex: 1;
+	}
+
+	.play {
+		display: flex;
+		flex-direction: column;
 		margin: auto 0;
-		padding-bottom: 5vh;
+		padding-bottom: 6vh;
 	}
 
 	.topbar {
@@ -288,6 +295,25 @@
 	.paused {
 		text-align: center;
 		padding: 3rem 0;
+		margin: auto 0;
+	}
+
+	/* Touch devices: comfortable 44px-class targets for the round
+	   controls; desktop keeps the compact chips. */
+	@media (pointer: coarse) {
+		.chip {
+			padding: 0.6rem 0.95rem;
+			font-size: 0.95rem;
+		}
+
+		.icon-chip {
+			padding: 0.6rem 0.75rem;
+		}
+
+		.erase {
+			padding: 0.55rem 1.2rem;
+			font-size: 0.95rem;
+		}
 	}
 
 	/* Slots and rack always stay on one row; sizes derive from letter count. */
