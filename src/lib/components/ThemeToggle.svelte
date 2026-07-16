@@ -3,15 +3,7 @@
 	import { effectiveTheme } from '$lib/theme';
 	import Icon from './Icon.svelte';
 
-	let effective = $state<'light' | 'dark'>('light');
-
-	$effect(() => {
-		effective = effectiveTheme();
-		const mq = matchMedia('(prefers-color-scheme: dark)');
-		const onChange = () => (effective = effectiveTheme());
-		mq.addEventListener('change', onChange);
-		return () => mq.removeEventListener('change', onChange);
-	});
+	let effective = $derived<'light' | 'dark'>(effectiveTheme());
 
 	function toggle() {
 		const next = effective === 'dark' ? 'light' : 'dark';

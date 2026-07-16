@@ -17,6 +17,7 @@
 	import type { WirePuzzle } from '$lib/game/types';
 	import RoundBoard from './RoundBoard.svelte';
 	import ResultScreen from './ResultScreen.svelte';
+	import AppBadges from './AppBadges.svelte';
 	import Icon from './Icon.svelte';
 
 	let {
@@ -213,6 +214,10 @@
 					<span><Icon name="no-timer" size={15} /> Rahat mod <em>(süre yok)</em></span>
 				</label>
 				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
+			{/if}
+
+			{#if !__MOBILE__ && mode === 'daily' && !resuming}
+				<AppBadges />
 			{/if}
 		</div>
 	{:else if engine.phase === 'playing'}

@@ -7,7 +7,7 @@
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>tr</string>
 	<key>CFBundleDisplayName</key>
         <string>21kelime</string>
 	<key>CFBundleExecutable</key>
