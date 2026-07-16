@@ -188,13 +188,28 @@
 		/* Status (counter, timer, controls) stays pinned at the top where
 		   it is glanceable; the play surface centers in the rest. */
 		flex: 1;
+		position: relative;
 	}
 
+	/* Dead center of the play area, independent of the status bar above. */
 	.play {
 		display: flex;
 		flex-direction: column;
-		margin: auto 0;
-		padding-bottom: 6vh;
+		position: absolute;
+		top: 50%;
+		left: 0;
+		right: 0;
+		transform: translateY(-50%);
+	}
+
+	/* Short viewports (landscape phones, small windows): flow normally so
+	   the play surface can never slide under the status row. */
+	@media (max-height: 560px) {
+		.play {
+			position: static;
+			transform: none;
+			margin: auto 0;
+		}
 	}
 
 	.topbar {

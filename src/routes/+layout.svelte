@@ -113,7 +113,10 @@
 	.app {
 		max-width: 32rem;
 		margin: 0 auto;
-		min-height: 100dvh;
+		/* The body already carries the safe-area padding; claiming a full
+		   100dvh on top of it made the page overflow by exactly the inset
+		   height and scroll on notched phones. */
+		min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
 		display: flex;
 		flex-direction: column;
 		padding: 0 1rem;
