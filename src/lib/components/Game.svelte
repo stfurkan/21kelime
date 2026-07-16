@@ -357,7 +357,9 @@
 		align-items: center;
 		gap: 0.7rem;
 		text-align: center;
-		padding-top: 3rem;
+		/* Transient screen: center it in the free space like the start view. */
+		margin: auto 0;
+		padding: 1rem 0 12vh;
 	}
 
 	.between-title {

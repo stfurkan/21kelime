@@ -405,4 +405,39 @@
 	.erase:disabled {
 		opacity: 0.35;
 	}
+
+	/* Tall screens: scale the board up so it uses the room instead of
+	   hugging the top. Sizes only; the layout stays anchored so tiles
+	   never shift position between rounds. */
+	@media (min-height: 640px) {
+		.board {
+			gap: 1.4rem;
+			padding-top: 0.8rem;
+		}
+
+		.slots {
+			margin-top: 1.4rem;
+			min-height: 3.8rem;
+		}
+
+		.slot {
+			width: min(3.6rem, calc((100% - (var(--n) - 1) * 0.3rem) / var(--n)));
+			font-size: min(1.85rem, calc(44vw / var(--n)));
+		}
+
+		.rack {
+			margin-top: 2.2rem;
+			gap: 0.5rem;
+		}
+
+		.tile {
+			width: min(4.2rem, calc((100% - (var(--n) - 1) * 0.5rem) / var(--n)));
+			min-height: 3.1rem;
+			font-size: min(2rem, calc(46vw / var(--n)));
+		}
+
+		.erase {
+			margin-top: 1.4rem;
+		}
+	}
 </style>
