@@ -93,6 +93,8 @@ a {
 	overscroll-behavior: none;
 	user-select: none;
 	-webkit-user-select: none;
+	/* The sticky app header carries the top inset instead. */
+	padding-top: 0;
 }
 
 a {

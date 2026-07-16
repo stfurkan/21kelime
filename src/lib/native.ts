@@ -26,6 +26,88 @@ export async function initNative(): Promise<void> {
 		attributes: true,
 		attributeFilter: ['data-theme']
 	});
+	// Keep the reminder queue topped up (no-op unless the user opted in).
+	void refreshReminders();
+}
+
+// ---- Daily reminder (opt-in, local notifications, no server) ----
+
+const REMINDER_KEY = '21kelime:reminder';
+const REMINDER_HOUR = 10;
+const REMINDER_IDS = [8101, 8102, 8103, 8104, 8105, 8106, 8107];
+
+export function remindersEnabled(): boolean {
+	try {
+		return localStorage.getItem(REMINDER_KEY) === '1';
+	} catch {
+		return false;
+	}
+}
+
+/** Turn the daily reminder on or off. Returns the resulting state
+ *  (false when the OS notification permission was declined). */
+export async function setRemindersEnabled(on: boolean): Promise<boolean> {
+	if (!__MOBILE__) return false;
+	const { LocalNotifications } = await import('@capacitor/local-notifications');
+	if (!on) {
+		try {
+			localStorage.removeItem(REMINDER_KEY);
+		} catch {
+			/* ignore */
+		}
+		await LocalNotifications.cancel({ notifications: REMINDER_IDS.map((id) => ({ id })) });
+		return false;
+	}
+	const perm = await LocalNotifications.requestPermissions();
+	if (perm.display !== 'granted') return false;
+	try {
+		localStorage.setItem(REMINDER_KEY, '1');
+	} catch {
+		/* ignore */
+	}
+	await refreshReminders();
+	return true;
+}
+
+/**
+ * Reschedule the next week of 10:00 reminders, skipping today when the
+ * daily puzzle is already done. Called on app start and after finishing
+ * a game, so the queue stays fresh as long as the app gets opened.
+ */
+export async function refreshReminders(): Promise<void> {
+	if (!__MOBILE__ || !remindersEnabled()) return;
+	try {
+		const [{ LocalNotifications }, { loadDayState }, { istanbulToday }] = await Promise.all([
+			import('@capacitor/local-notifications'),
+			import('$lib/game/storage'),
+			import('$lib/game/daily')
+		]);
+		await LocalNotifications.cancel({ notifications: REMINDER_IDS.map((id) => ({ id })) });
+		const doneToday = loadDayState(istanbulToday())?.done === true;
+		const now = new Date();
+		const notifications = [];
+		for (let d = 0; d < REMINDER_IDS.length; d++) {
+			const at = new Date(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate() + d,
+				REMINDER_HOUR,
+				0,
+				0
+			);
+			if (at <= now) continue;
+			if (d === 0 && doneToday) continue;
+			notifications.push({
+				id: REMINDER_IDS[d],
+				title: '21kelime',
+				body: 'Günün bulmacası hazır. Serini korumayı unutma!',
+				schedule: { at }
+			});
+		}
+		if (notifications.length) await LocalNotifications.schedule({ notifications });
+	} catch {
+		// Notifications unavailable: the game works fine without them.
+	}
 }
 
 async function syncStatusBar(): Promise<void> {

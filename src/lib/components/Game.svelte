@@ -13,11 +13,10 @@
 	} from '$lib/game/storage';
 	import { dateOfDay } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
-	import { hapticOutcome } from '$lib/native';
+	import { hapticOutcome, refreshReminders } from '$lib/native';
 	import type { WirePuzzle } from '$lib/game/types';
 	import RoundBoard from './RoundBoard.svelte';
 	import ResultScreen from './ResultScreen.svelte';
-	import AppBadges from './AppBadges.svelte';
 	import Icon from './Icon.svelte';
 
 	let {
@@ -54,6 +53,8 @@
 		onTick: (index, secondsLeft) => saveProgress(false, { index, secondsLeft }),
 		onFinish: () => {
 			saveProgress(true);
+			// Daily done: drop today's pending reminder (app builds only).
+			if (mode === 'daily') void refreshReminders();
 			// Streaks/stats count once, for the daily puzzle only. A game
 			// started before midnight and finished just after still counts:
 			// accept today's date or yesterday's (the session's own date).
@@ -214,10 +215,6 @@
 					<span><Icon name="no-timer" size={15} /> Rahat mod <em>(süre yok)</em></span>
 				</label>
 				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
-			{/if}
-
-			{#if !__MOBILE__ && mode === 'daily' && !resuming}
-				<AppBadges />
 			{/if}
 		</div>
 	{:else if engine.phase === 'playing'}

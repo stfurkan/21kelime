@@ -7,6 +7,7 @@
 	import StatsModal from '$lib/components/StatsModal.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import TabBar from '$lib/components/TabBar.svelte';
+	import AppBadges from '$lib/components/AppBadges.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { pruneOldDayStates } from '$lib/game/storage';
 	import { initNative } from '$lib/native';
@@ -62,7 +63,7 @@
 </svelte:head>
 
 <div class="app">
-	<header>
+	<header class:sticky={__MOBILE__}>
 		<a class="logo" href={resolve('/')} aria-label="21kelime ana sayfa">
 			<span class="logo-num">21</span><span class="logo-word">kelime</span>
 		</a>
@@ -95,6 +96,7 @@
 
 	{#if !__MOBILE__}
 		<footer>
+			<AppBadges />
 			<span>Her gece yarısı yeni bulmaca (TSİ)</span>
 			<nav class="legal-links">
 				<a href={resolve('/gizlilik')}>Gizlilik</a>
@@ -129,6 +131,25 @@
 		gap: 1.2rem;
 		padding: 0.9rem 0;
 		border-bottom: 1px solid var(--line);
+	}
+
+	/* App builds: the top inset lives in the header now, so only the
+	   bottom inset comes off the container height. */
+	:global(:root.native) .app {
+		min-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+	}
+
+	/* App builds: header stays put like the tab bar; content scrolls
+	   underneath. The notch inset moves from the body into the header. */
+	header.sticky {
+		position: sticky;
+		top: 0;
+		z-index: 15;
+		background: var(--bg);
+		margin: 0 -1rem;
+		padding-left: 1rem;
+		padding-right: 1rem;
+		padding-top: calc(0.9rem + env(safe-area-inset-top));
 	}
 
 	.logo {

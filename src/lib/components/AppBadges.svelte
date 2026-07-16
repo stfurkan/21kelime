@@ -31,7 +31,7 @@
 		gap: 0.6rem;
 		flex-wrap: wrap;
 		justify-content: center;
-		margin-top: 0.6rem;
+		margin-bottom: 0.7rem;
 	}
 
 	.badge {
