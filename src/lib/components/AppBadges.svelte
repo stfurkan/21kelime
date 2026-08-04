@@ -1,5 +1,4 @@
-<!-- Store badges for the web start screen. The App Store one links out;
-     Google Play shows as coming soon until the Play launch. -->
+<!-- Store badges for the web start screen; both link to the live listings. -->
 <div class="badges">
 	<a
 		class="badge"
@@ -15,14 +14,20 @@
 		</svg>
 		<span class="lines"><small>App Store'dan</small><strong>İndirin</strong></span>
 	</a>
-	<div class="badge soon" title="Google Play sürümü hazırlanıyor">
+	<a
+		class="badge"
+		href="https://play.google.com/store/apps/details?id=com.kelime21.app"
+		target="_blank"
+		rel="noopener noreferrer"
+		aria-label="Google Play'den indir"
+	>
 		<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
 			<path d="M4 3.5v17c0 .4.5.7.8.4l9.2-8.2c.2-.2.2-.5 0-.7L4.8 3.1c-.3-.3-.8 0-.8.4z" />
 			<path d="M14.9 9.4 6.7 2.2l11.2 6.3-3 .9zM14.9 14.6l3 .9-11.2 6.3 8.2-7.2z" opacity="0.55" />
 			<path d="M15.9 10.1l3.8 2.1c.4.2.4.8 0 1l-3.8 2.1-1.7-2.6 1.7-2.6z" opacity="0.75" />
 		</svg>
-		<span class="lines"><small>Google Play'de</small><strong>Yakında</strong></span>
-	</div>
+		<span class="lines"><small>Google Play'den</small><strong>İndirin</strong></span>
+	</a>
 </div>
 
 <style>
@@ -74,8 +79,4 @@
 		font-weight: 700;
 	}
 
-	.soon {
-		opacity: 0.55;
-		cursor: default;
-	}
 </style>
