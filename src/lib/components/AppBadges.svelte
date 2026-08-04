@@ -78,5 +78,4 @@
 		font-size: 0.98rem;
 		font-weight: 700;
 	}
-
 </style>
