@@ -16,7 +16,8 @@ export const ROUND_PLAN: readonly number[] = [
 export const SECONDS_PER_ROUND = 30;
 export const REVEALS_PER_DAY = 3;
 
-const COUNT_BY_LEN: ReadonlyMap<number, number> = (() => {
+/** How many words of each length one day consumes, from ROUND_PLAN. */
+export const COUNT_BY_LEN: ReadonlyMap<number, number> = (() => {
 	const m = new Map<number, number>();
 	for (const len of ROUND_PLAN) m.set(len, (m.get(len) ?? 0) + 1);
 	return m;
