@@ -196,4 +196,77 @@ describe('GameEngine', () => {
 		expect(ticks).toHaveLength(3);
 		expect(ticks[0]).toBeCloseTo(29, 0);
 	});
+	it('clears the wrong-guess shake before the next round starts', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		typeWord(engine, 'teve'); // wrong
+		expect(engine.wrongShake).toBe(1);
+		vi.advanceTimersByTime(500);
+		typeWord(engine, 'evet');
+		engine.advance();
+		expect(engine.roundIndex).toBe(1);
+		// Carried over, this made the board mount already shaking and fire
+		// the wrong-guess buzz on a round the player had not even started.
+		expect(engine.wrongShake).toBe(0);
+	});
+
+	it('pauses instead of burning the clock when the tab goes to the background', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		vi.advanceTimersByTime(5000);
+		expect(engine.secondsLeft).toBeCloseTo(25, 1);
+		engine.pauseForBackground();
+		expect(engine.paused).toBe(true);
+		// Two minutes away: the round must neither expire nor lose time.
+		vi.advanceTimersByTime(120_000);
+		expect(engine.phase).toBe('playing');
+		expect(engine.secondsLeft).toBeCloseTo(25, 1);
+		engine.togglePause();
+		vi.advanceTimersByTime(5000);
+		expect(engine.secondsLeft).toBeCloseTo(20, 1);
+	});
+
+	it('reads the clock from wall time, so a throttled tick cannot gift seconds', () => {
+		const engine = freshEngine();
+		engine.start(false);
+		// A hidden tab still gets ticks, just far fewer: browsers throttle the
+		// interval to once a second and then once a minute. Counting ticks
+		// handed back ten times the real thinking time.
+		vi.setSystemTime(Date.now() + 20_000);
+		vi.advanceTimersByTime(100); // one lonely tick
+		expect(engine.secondsLeft).toBeCloseTo(9.9, 1);
+	});
+
+	it('falls back to the Turkish letter a foreign keyboard cannot type', () => {
+		const engine = new GameEngine(
+			{
+				day: 1,
+				date: '2026-07-12',
+				rounds: [{ letters: ['e', 'ş', 'k', 'r', 'e'], answers: ['şeker'], canonical: 'şeker' }]
+			},
+			'practice'
+		);
+		engine.start(true);
+		// A US layout cannot produce ş at all; s stands in for it.
+		for (const ch of 'seker') engine.typeLetter(ch);
+		expect(engine.results[0].outcome).toBe('solved');
+		expect(engine.results[0].word).toBe('şeker');
+	});
+
+	it('spends an exact letter before reaching for the fallback', () => {
+		const engine = new GameEngine(
+			{
+				day: 1,
+				date: '2026-07-12',
+				rounds: [{ letters: ['s', 'ş', 'e', 'k'], answers: ['sşek'], canonical: 'sşek' }]
+			},
+			'practice'
+		);
+		engine.start(true);
+		engine.typeLetter('s');
+		expect(engine.currentWord).toBe('s');
+		// The plain s is used up, so the next one may take ş.
+		engine.typeLetter('s');
+		expect(engine.currentWord).toBe('sş');
+	});
 });

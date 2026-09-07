@@ -9,6 +9,21 @@ import type { Puzzle, Round, RoundOutcome, RoundResult } from './types.ts';
 export type GamePhase = 'start' | 'playing' | 'between' | 'done';
 export type GameMode = 'daily' | 'archive' | 'practice';
 
+/**
+ * Turkish letters a non-Turkish keyboard layout simply cannot produce.
+ * Pressing the plain letter falls back to its dotted/cedilla cousin, but
+ * only when the plain one is not on the rack, so Q/F typists are never
+ * second-guessed.
+ */
+const ASCII_FALLBACK: Readonly<Record<string, string>> = {
+	c: 'ç',
+	g: 'ğ',
+	i: 'ı',
+	o: 'ö',
+	s: 'ş',
+	u: 'ü'
+};
+
 const WRONG_CLEAR_MS = 350;
 const BETWEEN_SOLVED_MS = 1000;
 const BETWEEN_FAILED_MS = 2600;
@@ -41,6 +56,8 @@ export class GameEngine {
 	lastOutcome = $state<RoundOutcome | null>(null);
 
 	private timerHandle: ReturnType<typeof setInterval> | null = null;
+	/** Wall-clock instant the round runs out; null while paused or stopped. */
+	private deadline: number | null = null;
 	private betweenHandle: ReturnType<typeof setTimeout> | null = null;
 	private wrongHandle: ReturnType<typeof setTimeout> | null = null;
 	private tickCount = 0;
@@ -122,14 +139,22 @@ export class GameEngine {
 		this.resumeSecondsLeft = null;
 		this.paused = false;
 		this.lastOutcome = null;
+		// Per-round state: a value carried over from the previous round made
+		// the board mount mid-shake and fire the wrong-guess buzz.
+		this.wrongShake = 0;
+		this.deadline = null;
 		this.phase = 'playing';
 		if (!this.relax) this.startTimer();
 	}
 
 	private startTimer(): void {
+		this.deadline = Date.now() + this.secondsLeft * 1000;
 		this.timerHandle = setInterval(() => {
-			if (this.paused) return;
-			this.secondsLeft = Math.max(0, this.secondsLeft - TICK_MS / 1000);
+			if (this.paused || this.deadline === null) return;
+			// Read the wall clock rather than counting ticks: browsers throttle
+			// setInterval to once a second (then once a minute) in a hidden tab,
+			// which would hand out ten times the real thinking time.
+			this.secondsLeft = Math.max(0, (this.deadline - Date.now()) / 1000);
 			// Throttled persistence hook so a refresh can restore the clock.
 			this.tickCount = (this.tickCount + 1) % 10;
 			if (this.tickCount === 0) this.onTick(this.roundIndex, this.secondsLeft);
@@ -147,6 +172,22 @@ export class GameEngine {
 	togglePause(): void {
 		if (this.phase !== 'playing' || this.relax) return;
 		this.paused = !this.paused;
+		// Freeze the deadline while paused, then push it out by the time spent
+		// paused so resuming gives back exactly the seconds that were left.
+		this.deadline = this.paused ? null : Date.now() + this.secondsLeft * 1000;
+	}
+
+	/**
+	 * The tab or app went to the background. Pause instead of letting the
+	 * clock run on: the board is hidden while paused, so this closes the
+	 * "switch away, look the word up, come back" hole without punishing a
+	 * real interruption.
+	 */
+	pauseForBackground(): void {
+		if (this.phase !== 'playing' || this.relax || this.paused) return;
+		this.paused = true;
+		this.deadline = null;
+		this.persistClock();
 	}
 
 	/**
@@ -174,7 +215,11 @@ export class GameEngine {
 	typeLetter(rawKey: string): void {
 		if (this.phase !== 'playing' || this.paused) return;
 		const letter = normalizeWord(trLower(rawKey));
-		const index = this.tiles.findIndex((t) => !t.used && t.letter === letter);
+		let index = this.tiles.findIndex((t) => !t.used && t.letter === letter);
+		if (index === -1) {
+			const alt = ASCII_FALLBACK[letter];
+			if (alt) index = this.tiles.findIndex((t) => !t.used && t.letter === alt);
+		}
 		if (index !== -1) this.pickTile(index);
 	}
 
@@ -253,7 +298,6 @@ export class GameEngine {
 		for (const t of this.tiles) t.used = false;
 		this.inputTileIndices = [];
 		this.consumeRevealTiles();
-		if (this.revealedCount === this.wordLength) this.submit();
 	}
 
 	submit(): void {
@@ -306,5 +350,6 @@ export class GameEngine {
 		if (this.betweenHandle) clearTimeout(this.betweenHandle);
 		if (this.wrongHandle) clearTimeout(this.wrongHandle);
 		this.timerHandle = this.betweenHandle = this.wrongHandle = null;
+		this.deadline = null;
 	}
 }
