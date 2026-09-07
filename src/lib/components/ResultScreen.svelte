@@ -3,7 +3,7 @@
 	import type { GameEngine } from '$lib/game/engine.svelte';
 	import { shareText, challengeText, share, scoreOf } from '$lib/game/share';
 	import { shareResultImage } from '$lib/game/resultImage';
-	import { openExternal } from '$lib/native';
+	import { hapticTap, openExternal } from '$lib/native';
 	import { ROUND_PLAN } from '$lib/game/generate';
 	import { loadStats } from '$lib/game/storage';
 	import { msUntilNextPuzzle, istanbulToday } from '$lib/game/daily';
@@ -92,11 +92,13 @@
 	}
 
 	async function doShare() {
+		hapticTap();
 		const result = await share(text);
 		if (result === 'copied') flash('copied');
 	}
 
 	async function doCopy() {
+		hapticTap();
 		try {
 			await navigator.clipboard.writeText(text);
 			flash('copied');
@@ -106,6 +108,7 @@
 	}
 
 	async function doChallenge() {
+		hapticTap();
 		const challenge = challengeText(engine.puzzle.day, engine.results);
 		if (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0 && 'share' in navigator) {
 			try {
@@ -126,6 +129,7 @@
 	// Web pages cannot post into Instagram and friends directly; the image
 	// goes to the OS share sheet on phones and downloads on desktop.
 	async function doImageShare() {
+		hapticTap();
 		const outcome = await shareResultImage({
 			day: engine.puzzle.day,
 			dateLabel,
@@ -199,7 +203,13 @@
 
 	{#if isDaily}
 		{#if newPuzzleReady}
-			<button class="btn btn-primary" onclick={() => location.reload()}>
+			<button
+				class="btn btn-primary"
+				onclick={() => {
+					hapticTap();
+					location.reload();
+				}}
+			>
 				Yeni bulmaca hazır, oyna
 			</button>
 		{:else}
@@ -250,7 +260,13 @@
 
 	<div class="links">
 		{#if isPractice}
-			<button class="btn" onclick={() => onNewPractice?.()}>Yeni antrenman</button>
+			<button
+				class="btn"
+				onclick={() => {
+					hapticTap();
+					onNewPractice?.();
+				}}>Yeni antrenman</button
+			>
 		{:else}
 			<a class="btn" href={resolve('/arsiv')}>Arşiv</a>
 			<a class="btn" href={resolve('/antrenman')}>Antrenman</a>
@@ -270,13 +286,13 @@
 
 	.verdict {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: var(--fs-lead);
 		font-weight: 700;
 	}
 
 	.score {
 		margin: 0;
-		font-size: 3.2rem;
+		font-size: var(--fs-score);
 		font-weight: 800;
 		line-height: 1;
 		display: flex;
@@ -290,7 +306,7 @@
 	}
 
 	.denom {
-		font-size: 1.6rem;
+		font-size: var(--fs-title);
 		line-height: 1.05;
 		color: var(--ink-soft);
 		font-weight: 600;
