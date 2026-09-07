@@ -134,9 +134,15 @@ writeFileSync(
 	OUT_PATH,
 	JSON.stringify({ version: DATA_VERSION, sources: SOURCES, validation, pools })
 );
+// minVersion is hand-maintained (see static/data-version.json); carry it
+// across so rebuilding word data never silently lifts a forced update.
+const versionPath = join(ROOT, 'static', 'data-version.json');
+const previousStatus = existsSync(versionPath)
+	? (JSON.parse(readFileSync(versionPath, 'utf8')) as { minVersion?: string | null })
+	: {};
 writeFileSync(
-	join(ROOT, 'static', 'data-version.json'),
-	JSON.stringify({ version: DATA_VERSION }) + '\n'
+	versionPath,
+	JSON.stringify({ version: DATA_VERSION, minVersion: previousStatus.minVersion ?? null }) + '\n'
 );
 
 console.log(`wrote ${OUT_PATH} (${validation.length} validation words)`);
