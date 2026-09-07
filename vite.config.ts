@@ -13,6 +13,12 @@ export default defineConfig({
 	},
 	plugins: [
 		sveltekit({
+			// The apps already play offline from embedded word data and are
+			// served from capacitor://localhost; a service worker there would
+			// only add a second cache in front of files that never change.
+			// Spread rather than pass undefined: an explicit undefined here
+			// overrides the default instead of falling back to it.
+			...(mobile ? { serviceWorker: { register: false as const } } : {}),
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) =>
