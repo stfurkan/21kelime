@@ -19,3 +19,14 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+      # Drives real Chrome through a full 21-round day against the built
+      # site. It was never wired up here, which is how a suite that failed
+      # on 43% of days went unnoticed for weeks.
+      - name: End-to-end
+        run: |
+          npm run preview &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:4173/ >/dev/null && break
+            sleep 1
+          done
+          npm run test:e2e

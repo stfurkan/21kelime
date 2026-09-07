@@ -71,6 +71,8 @@ npm run build && npm run preview   # 4173 portunda çalışır
 npm run test:e2e                   # ayrı bir terminalde
 ```
 
+Playwright, US klavye düzeninde olmayan ç/ğ/ı/ö/ş/ü harflerini `keyboard.type()` ile üretemez (keydown olayı hiç doğmaz), bu yüzden [scripts/e2e-helpers.ts](scripts/e2e-helpers.ts) bu harfleri karolara tıklayarak girer. Testler CI'da her push'ta koşar.
+
 ## Yayınlama
 
 Cloudflare Workers'a yayınlamak için tek komut yeter (derlemeyi wrangler kendisi çalıştırır):

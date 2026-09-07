@@ -1,6 +1,7 @@
 import { chromium } from 'playwright-core';
 import { fromWire } from '../src/lib/game/wire.ts';
 import { trUpper } from '../src/lib/words/normalize.ts';
+import { enterWord, tapLetter } from './e2e-helpers.ts';
 
 const BASE = 'http://localhost:4173';
 const SCRATCH = process.env.SHOT_DIR ?? '/tmp';
@@ -21,13 +22,7 @@ await page.goto(BASE);
 await page.getByRole('button', { name: 'Başla' }).click();
 
 // Round 1: solve by clicking tiles in canonical order.
-for (const ch of puzzle.rounds[0].canonical) {
-	await page
-		.getByRole('button', { name: `Harf ${trUpper(ch)}`, exact: true })
-		.locator('visible=true')
-		.first()
-		.click();
-}
+for (const ch of puzzle.rounds[0].canonical) await tapLetter(page, ch);
 await page.getByText('Doğru!').waitFor({ timeout: 3000 });
 console.log('PASS: round 1 solved by tile clicks');
 await page.screenshot({ path: `${SCRATCH}/between.png` });
@@ -41,7 +36,7 @@ await page.getByRole('button', { name: /İpucu/ }).click();
 const word2 = puzzle.rounds[1].canonical;
 await page.getByText(trUpper(word2[0]), { exact: true }).first().waitFor({ timeout: 2000 });
 console.log('PASS: reveal placed first letter');
-for (const ch of word2.slice(1)) await page.keyboard.type(ch);
+await enterWord(page, word2.slice(1));
 await page.getByText(/İpucuyla çözdün/).waitFor({ timeout: 3000 });
 console.log('PASS: round 2 solved via keyboard after reveal (outcome: revealed)');
 
@@ -50,7 +45,7 @@ await page.getByText('3/21').waitFor({ timeout: 5000 });
 await page.screenshot({ path: `${SCRATCH}/round3.png` });
 const letters3 = puzzle.rounds[2].letters.join('');
 // letters as scrambled are guaranteed not to be an answer
-for (const ch of letters3) await page.keyboard.type(ch);
+await enterWord(page, letters3);
 await page.waitForTimeout(700);
 const still3 = await page.getByText('3/21').isVisible();
 if (!still3) fail('wrong word should not advance the round');

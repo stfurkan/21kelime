@@ -1,5 +1,6 @@
 import { chromium } from 'playwright-core';
 import { fromWire } from '../src/lib/game/wire.ts';
+import { enterWord } from './e2e-helpers.ts';
 
 const BASE = 'http://localhost:4173';
 const SCRATCH = process.env.SHOT_DIR ?? '/tmp';
@@ -39,12 +40,24 @@ await page.getByRole('button', { name: 'Devam et' }).click();
 await page.getByText('21/21').waitFor({ timeout: 3000 });
 console.log('PASS: resumed at final round 21');
 
-// Solve the last round (9 letters) via keyboard.
-for (const ch of puzzle.rounds[20].canonical) await page.keyboard.type(ch);
+// Solve the last round (9 letters).
+await enterWord(page, puzzle.rounds[20].canonical);
 await page.getByText('Sonuçlar').click();
 await page.getByText('18/21', { exact: false }).first().waitFor({ timeout: 4000 });
 console.log('PASS: result screen shows 18/21');
 await page.screenshot({ path: `${SCRATCH}/result.png`, fullPage: true });
+
+// The compact history record is what keeps the archive honest after the
+// 60-day day-state prune, so it must be written on finish.
+const history = await page.evaluate(() =>
+	JSON.parse(localStorage.getItem('21kelime:history') ?? 'null')
+);
+if (history?.[String(puzzle.day)] === 18) {
+	console.log('PASS: day recorded in the compact history');
+} else {
+	console.error('FAIL: history not recorded', history);
+	process.exitCode = 1;
+}
 
 // Stats must be counted exactly once.
 const stats = await page.evaluate(() =>
