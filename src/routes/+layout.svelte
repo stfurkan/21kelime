@@ -8,16 +8,27 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import TabBar from '$lib/components/TabBar.svelte';
 	import AppBadges from '$lib/components/AppBadges.svelte';
+	import UpdateGate from '$lib/components/UpdateGate.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { pruneOldDayStates } from '$lib/game/storage';
+	import { page } from '$app/state';
+	import { pruneOldDayStates, seedHistoryFromDayStates } from '$lib/game/storage';
 	import { initNative } from '$lib/native';
+	import { syncThemeColor } from '$lib/theme';
 
 	let { children } = $props();
 
-	// Housekeeping: cap localStorage growth from years of daily play.
-	$effect(() => pruneOldDayStates());
+	// Housekeeping: cap localStorage growth from years of daily play. Capture
+	// the compact score record first, or pruning would take the archive's
+	// only memory of the oldest days with it.
+	$effect(() => {
+		seedHistoryFromDayStates();
+		pruneOldDayStates();
+	});
 	// No-op on the web; wires back button, status bar and haptics in the app.
 	$effect(() => void initNative());
+	// The pre-paint script in app.html picks the theme before any component
+	// exists, so the browser chrome needs catching up once on load.
+	$effect(() => syncThemeColor());
 
 	const jsonLd =
 		'<script type="application/ld+json">' +
@@ -62,7 +73,7 @@
 	{@html jsonLd}
 </svelte:head>
 
-<div class="app">
+<div class="app" class:web={!__MOBILE__}>
 	<header class:sticky={__MOBILE__}>
 		<a class="logo" href={resolve('/')} aria-label="21kelime ana sayfa">
 			<span class="logo-num">21</span><span class="logo-word">kelime</span>
@@ -96,7 +107,11 @@
 
 	{#if !__MOBILE__}
 		<footer>
-			<AppBadges />
+			<!-- /indir leads with its own badges; a second pair in the footer
+			     just reads as a mistake. -->
+			{#if page.url.pathname !== '/indir'}
+				<AppBadges />
+			{/if}
 			<span>Her gece yarısı yeni bulmaca (TSİ)</span>
 			<nav class="legal-links">
 				<a href={resolve('/gizlilik')}>Gizlilik</a>
@@ -110,6 +125,7 @@
 
 <HelpModal />
 <StatsModal />
+<UpdateGate />
 
 <style>
 	.app {
@@ -128,6 +144,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		/* Wrap rather than overflow. At a large system font size the nav
+		   outgrew the row and the theme toggle was pushed off the screen
+		   entirely, with no way to reach it. */
+		flex-wrap: wrap;
+		row-gap: 0.4rem;
 		gap: 1.2rem;
 		padding: 0.9rem 0;
 		border-bottom: 1px solid var(--line);
@@ -166,6 +187,8 @@
 	nav {
 		display: flex;
 		align-items: center;
+		flex-wrap: wrap;
+		row-gap: 0.3rem;
 		gap: 0.9rem;
 	}
 
@@ -190,6 +213,34 @@
 
 		nav a {
 			font-size: 0.84rem;
+		}
+	}
+
+	/* Tablets and roomy desktop windows. The 32rem column reads as a thin
+	   strip down the middle of an iPad, so give the board real room. Height
+	   is in the guard too, or a phone held sideways would qualify and the
+	   board would not fit between the header and the tab bar. */
+	@media (min-width: 700px) and (min-height: 700px) {
+		.app {
+			max-width: 40rem;
+			padding: 0 1.5rem;
+		}
+	}
+
+	/* Very tall screens, iPad portrait above all. A column stretched to the
+	   full 1366px leaves the board marooned in the middle of an empty page,
+	   so cap it and let app.css centre what is left. The app shell keeps the
+	   full height: its tab bar is pinned to the viewport, and a floating
+	   capped column above it would read as broken. */
+	@media (min-width: 700px) and (min-height: 950px) {
+		.app.web {
+			min-height: 0;
+			height: 880px;
+			/* app.css turns the body into a flex column here. A flex item with
+			   auto side margins is sized to its content, not stretched, so
+			   without this the column collapsed to the width of its longest
+			   line instead of honouring max-width. */
+			width: 100%;
 		}
 	}
 

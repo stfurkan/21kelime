@@ -12,7 +12,7 @@
 				var t = localStorage.getItem('21kelime:theme');
 				if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
 			} catch (e) {
-				/* storage blocked: fall back to system preference */
+				/* storage blocked: the light default applies */
 			}
 		</script>
 		%sveltekit.head%
