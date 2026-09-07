@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { effectiveTheme } from '$lib/theme';
+	import { effectiveTheme, syncThemeColor } from '$lib/theme';
 	import Icon from './Icon.svelte';
 
 	let effective = $derived<'light' | 'dark'>(effectiveTheme());
@@ -14,6 +14,7 @@
 			// storage blocked: theme still applies for this visit
 		}
 		effective = next;
+		syncThemeColor();
 	}
 </script>
 
