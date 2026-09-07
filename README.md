@@ -40,14 +40,27 @@ npm run lint           # prettier + eslint
 Kelimeler iki açık kaynaktan alınmıştır: Zemberek-NLP sözlükleri (TDK madde başlıkları) ve FrequencyWords sıklık listesi. Veriyi yeniden üretmek istersen:
 
 ```bash
-./scripts/fetch-data.sh           # ham verileri indirir
+./scripts/fetch-data.sh           # ham verileri indirir, sıklık listesini sadeleştirir
+node scripts/verify-tdk.ts        # yeni adayları TDK'de doğrular (önbelleğe yazar)
 npm run build:words               # words.json'ı üretir
 npm run build:words -- --report   # havuz istatistiklerini de gösterir
 ```
 
+Sıklık listesi 2 milyon satırlık `tr_full.txt` olarak inip [scripts/reduce-frequency.ts](scripts/reduce-frequency.ts) ile sözlükte karşılığı olan satırlara indirgenir; depoda yalnızca 290 KB'lık `tr_freq.txt` durur.
+
 Günlük bulmacada çıkmasını istemediğin kelimeleri [data/blocklist.txt](data/blocklist.txt) dosyasına ekleyebilirsin; oyuncu yazarsa yine kabul edilir, sadece soru olarak sorulmaz.
 
-**Dikkat:** Havuz sırası `POOL_SHUFFLE_SEED` tohumuna bağlı. Kelime verisini ya da tohumu değiştirirsen gelecek günlerin bulmacaları baştan sona değişir. Site yayındayken veri güncellemesini bilerek ve isteyerek yap, tohumun sürümünü de artır.
+#### Havuzlara yalnızca ekleme yapılır
+
+Gün N, `pools[len]` dizisinden sabit bir konumdan dilim alır: **dizinin içeriği yayındaki bulmaca takviminin ta kendisidir.** Bir kelimeyi çıkarmak ya da sırayı değiştirmek, oynanmış günleri geriye dönük değiştirir; üstelik uygulamalar bulmacayı kendi içlerindeki kopyadan hesapladığı için, çevrimdışı bir cihaza kelimelerin yer değiştirdiği haber verilemez.
+
+Sona eklemek güvenlidir: eski uzunluğun altındaki her konum aynı kelimeyi vermeye devam eder, yani eski ve yeni veri, eski havuz başa saracağı güne kadar bütün günlerde birebir aynı bulmacayı üretir.
+
+Kurallar:
+
+1. `words.json` içinde bulunan bir kelimeyi **asla** çıkarma ya da yerini değiştirme; sadece sona ekle. [scripts/build-words.ts](scripts/build-words.ts) bunu her derlemede doğrular ve ihlalde hata verir.
+2. Her veri değişikliğinde `DATA_VERSION`'ı artır. Çevrimiçi uygulamalar `/data-version.json` ile karşılaştırıp farklıysa bulmacayı sunucudan ister.
+3. Sona eklenen her kelimenin TDK'de madde başı olması gerekir: sonuç ekranı her cevabı sozluk.gov.tr'ye bağlar, karşılığı olmayan kelime kırık bağlantı demektir. Doğrulama sonuçları `data/tdk-verified.json` içinde önbelleğe alınır ve depoya girer, böylece derleme çevrimdışı ve deterministik kalır.
 
 ### Uçtan uca testler
 

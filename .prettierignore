@@ -11,6 +11,8 @@ bun.lockb
 # generated data
 src/lib/puzzles/data/
 data/raw/
+# TDK lookup cache: machine-written, one line, thousands of keys
+data/tdk-verified.json
 
 # Capacitor native projects (generated)
 /android/

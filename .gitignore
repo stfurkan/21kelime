@@ -28,6 +28,11 @@ ios/App/App/public
 ios/App/App/capacitor.config.json
 ios/App/Pods
 
+# Full frequency list: a 28 MB build-time download that scripts/fetch-data.sh
+# reduces to the committed data/raw/tr_freq.txt. Keeping it out of the repo
+# keeps clones, and every deploy build, small.
+data/raw/tr_full.txt
+
 # OS
 .DS_Store
 Thumbs.db
