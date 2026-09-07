@@ -33,11 +33,11 @@
 </svelte:head>
 
 <div class="indir">
-	<h1>21kelime'yi indir</h1>
+	<h1><span class="num">21</span>kelime'yi indir</h1>
 	{#if redirecting}
 		<p class="sub">Mağazaya yönlendiriliyorsun…</p>
 	{:else}
-		<p class="sub">Günlük Türkçe kelime oyunu. Telefonun için ücretsiz.</p>
+		<p class="sub">Günlük Türkçe kelime oyunu. Ücretsiz indir.</p>
 	{/if}
 
 	<AppBadges />
@@ -62,7 +62,13 @@
 	h1 {
 		margin: 0;
 		font-size: var(--fs-title);
-		letter-spacing: -0.01em;
+		font-weight: 800;
+		letter-spacing: -0.02em;
+	}
+
+	/* Same treatment as the logo in the header: the 21 carries the accent. */
+	.num {
+		color: var(--accent);
 	}
 
 	.sub {
