@@ -1,5 +1,6 @@
 /** localStorage persistence. All access is guarded for SSR. */
 import { browser } from '$app/environment';
+import { dayNumberOf } from './daily.ts';
 import type { RoundResult } from './types.ts';
 
 const PREFIX = '21kelime';
@@ -101,6 +102,62 @@ export function pruneOldDayStates(keepDays = 60): void {
 
 export function saveStats(stats: Stats): void {
 	write(`${PREFIX}:stats`, stats);
+}
+
+// ---- Played-day history ----
+
+/**
+ * Every finished day as `day number -> score`, and nothing else.
+ *
+ * Day states hold all 21 rounds and are pruned after 60 days so storage
+ * cannot grow without bound (a finished day is about 1.6 KB, so a decade
+ * of them would be 5.6 MB and blow the quota). Losing them also lost the
+ * archive's record that the day was ever played, which read as data loss
+ * to anyone who had been playing since day one. This costs roughly six
+ * bytes per day -- a decade fits in 20 KB -- so it is never pruned.
+ */
+const HISTORY_KEY = `${PREFIX}:history`;
+
+/** Keys are day numbers as strings; values are that day's score. */
+export type History = Record<string, number>;
+
+export function loadHistory(): History {
+	const raw = read<History>(HISTORY_KEY);
+	return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+}
+
+export function recordHistory(day: number, score: number): void {
+	const history = loadHistory();
+	if (history[day] === score) return;
+	history[day] = score;
+	write(HISTORY_KEY, history);
+}
+
+/**
+ * Backfill history from day states that predate this record, so players
+ * who have been here since day one keep their earliest results. Must run
+ * before pruning, which is what would otherwise drop them.
+ */
+export function seedHistoryFromDayStates(): void {
+	if (!browser) return;
+	try {
+		const history = loadHistory();
+		const prefix = `${PREFIX}:day:`;
+		let changed = false;
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (!key?.startsWith(prefix)) continue;
+			const state = loadDayState(key.slice(prefix.length));
+			if (!state?.done) continue;
+			const day = dayNumberOf(key.slice(prefix.length));
+			if (history[day] !== undefined) continue;
+			history[day] = state.results.filter((r) => r.outcome !== 'failed').length;
+			changed = true;
+		}
+		if (changed) write(HISTORY_KEY, history);
+	} catch {
+		// Storage blocked: nothing to seed.
+	}
 }
 
 /** Pure streak/stats update, exported for tests. */

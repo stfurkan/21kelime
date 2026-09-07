@@ -9,11 +9,12 @@
 		saveDayState,
 		loadStats,
 		saveStats,
-		applyGameToStats
+		applyGameToStats,
+		recordHistory
 	} from '$lib/game/storage';
 	import { dateOfDay } from '$lib/game/daily';
 	import { trUpper } from '$lib/words/normalize';
-	import { hapticOutcome, refreshReminders } from '$lib/native';
+	import { hapticOutcome, hapticTap, maybeAskForReview, refreshReminders } from '$lib/native';
 	import type { WirePuzzle } from '$lib/game/types';
 	import RoundBoard from './RoundBoard.svelte';
 	import ResultScreen from './ResultScreen.svelte';
@@ -32,17 +33,22 @@
 	// svelte-ignore state_referenced_locally
 	const persist = mode !== 'practice';
 
+	// The only field a save must not clobber is statsCounted, so mirror it
+	// here. The clock hook fires every second while a round runs; going
+	// through loadDayState each time meant a synchronous read, parse and
+	// write on the main thread once a second, which is felt on cheap phones.
+	let statsCounted = false;
+
 	// Completing a round clears any pendingRound clock; a mid-round tick
 	// records it so a refresh resumes with the remaining time, not a full 30s.
 	function saveProgress(done: boolean, pendingRound?: { index: number; secondsLeft: number }) {
 		if (!persist) return;
-		const prev = loadDayState(puzzle.date);
 		saveDayState(puzzle.date, {
 			results: engine.results,
 			revealsLeft: engine.revealsLeft,
 			relax: engine.relax,
 			done,
-			statsCounted: prev?.statsCounted ?? false,
+			statsCounted,
 			...(pendingRound ? { pendingRound } : {})
 		});
 	}
@@ -60,6 +66,10 @@
 			// accept today's date or yesterday's (the session's own date).
 			const today = istanbulToday();
 			const startedRecently = puzzle.date === today || dayNumberOf(today) - puzzle.day === 1;
+			// Compact day -> score record. Full day states are pruned after 60
+			// days to cap storage; this one line per day is what keeps the
+			// archive showing an honest "played" mark years later.
+			recordHistory(puzzle.day, engine.score);
 			if (mode === 'daily' && startedRecently) {
 				const state = loadDayState(puzzle.date);
 				if (state && !state.statsCounted) {
@@ -73,8 +83,12 @@
 							puzzle.rounds.length
 						)
 					);
+					statsCounted = true;
 					saveDayState(puzzle.date, { ...state, statsCounted: true });
 				}
+				// Natural pause after a finished daily puzzle: the one moment
+				// worth asking a happy player for a store review.
+				void maybeAskForReview(engine.score, loadStats().gamesPlayed);
 			}
 		}
 	});
@@ -89,6 +103,7 @@
 		restored = true;
 		if (!persist) return;
 		const saved = loadDayState(puzzle.date);
+		statsCounted = saved?.statsCounted ?? false;
 		if (saved && (saved.results.length > 0 || saved.pendingRound)) {
 			const pending =
 				!saved.relax && saved.pendingRound?.index === saved.results.length
@@ -163,6 +178,13 @@
 </script>
 
 <svelte:window onkeydown={onKeydown} onpagehide={() => engine.persistClock()} />
+<!-- Leaving the tab or app pauses the round instead of letting the clock run
+     on unattended; the board hides itself while paused. -->
+<svelte:document
+	onvisibilitychange={() => {
+		if (document.hidden) engine.pauseForBackground();
+	}}
+/>
 
 <div class="game">
 	{#if engine.phase === 'start'}
@@ -206,7 +228,13 @@
 						Yarım kalan turdan devam edeceksin.
 					{/if}
 				</p>
-				<button class="btn btn-primary big" onclick={() => engine.start(engine.relax)}>
+				<button
+					class="btn btn-primary big"
+					onclick={() => {
+						hapticTap();
+						engine.start(engine.relax);
+					}}
+				>
 					Devam et
 				</button>
 			{:else}
@@ -214,7 +242,13 @@
 					<input type="checkbox" bind:checked={relaxChoice} />
 					<span><Icon name="no-timer" size={15} /> Rahat mod <em>(süre yok)</em></span>
 				</label>
-				<button class="btn btn-primary big" onclick={() => engine.start(relaxChoice)}>Başla</button>
+				<button
+					class="btn btn-primary big"
+					onclick={() => {
+						hapticTap();
+						engine.start(relaxChoice);
+					}}>Başla</button
+				>
 			{/if}
 		</div>
 	{:else if engine.phase === 'playing'}
@@ -239,7 +273,14 @@
 				</p>
 				<p class="between-word good-word">{trUpper(engine.results.at(-1)?.word ?? '')}</p>
 			{/if}
-			<button class="btn" onclick={() => engine.advance()} title="Enter ile de geçebilirsin">
+			<button
+				class="btn"
+				onclick={() => {
+					hapticTap();
+					engine.advance();
+				}}
+				title="Enter ile de geçebilirsin"
+			>
 				{lastRound ? 'Sonuçlar' : 'Devam'}
 				<Icon name="arrow-right" size={16} />
 			</button>
@@ -307,7 +348,7 @@
 
 	h1 {
 		margin: 0;
-		font-size: 1.45rem;
+		font-size: var(--fs-title);
 		letter-spacing: -0.01em;
 	}
 
@@ -344,7 +385,7 @@
 	}
 
 	.big {
-		font-size: 1.15rem;
+		font-size: var(--fs-lead);
 		padding: 0.85rem 2.6rem;
 	}
 
@@ -375,7 +416,7 @@
 
 	.between-title {
 		margin: 0;
-		font-size: 1.1rem;
+		font-size: var(--fs-lead);
 		font-weight: 700;
 		display: flex;
 		align-items: center;
@@ -389,7 +430,7 @@
 
 	.between-word {
 		margin: 0;
-		font-size: 2.3rem;
+		font-size: var(--fs-hero);
 		font-weight: 800;
 		letter-spacing: 0.06em;
 	}

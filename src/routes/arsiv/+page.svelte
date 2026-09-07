@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { istanbulToday, dayNumberOf, dateOfDay } from '$lib/game/daily';
-	import { loadDayState } from '$lib/game/storage';
+	import { loadDayState, loadHistory } from '$lib/game/storage';
 	import { scoreOf } from '$lib/game/share';
 
 	interface Entry {
@@ -9,6 +9,7 @@
 		date: string;
 		label: string;
 		status: string;
+		done: boolean;
 	}
 
 	// Newest days first, loaded in batches so the page stays fast even
@@ -30,17 +31,28 @@
 	// Built client-side: played-status lives in localStorage.
 	$effect(() => {
 		todayNum = dayNumberOf(istanbulToday());
+		// Day states older than 60 days are pruned; the compact history keeps
+		// the score, so an old day still reads as played rather than blank.
+		const history = loadHistory();
 		const first = todayNum;
 		const last = Math.max(1, todayNum - shown + 1);
 		const list: Entry[] = [];
 		for (let day = first; day >= last; day--) {
 			const date = dateOfDay(day);
 			const saved = loadDayState(date);
+			const archived = history[day];
 			let status = '';
-			if (saved?.done) status = `${scoreOf(saved.results)}/21`;
-			else if (saved && saved.results.length > 0)
+			let done = false;
+			if (saved?.done) {
+				status = `${scoreOf(saved.results)}/21`;
+				done = true;
+			} else if (saved && saved.results.length > 0) {
 				status = `devam ediyor (${saved.results.length}/21)`;
-			list.push({ day, date, label: fmt.format(new Date(`${date}T00:00:00Z`)), status });
+			} else if (archived !== undefined) {
+				status = `${archived}/21`;
+				done = true;
+			}
+			list.push({ day, date, label: fmt.format(new Date(`${date}T00:00:00Z`)), status, done });
 		}
 		entries = list;
 	});
@@ -63,7 +75,7 @@
 			<a href={e.day === todayNum ? resolve('/') : resolve('/arsiv/[date]', { date: e.date })}>
 				<span class="day">#{e.day}</span>
 				<span class="date">{e.label}</span>
-				<span class="status" class:done={e.status.includes('/21') && !e.status.includes('devam')}>
+				<span class="status" class:done={e.done}>
 					{e.status || 'oynanmadı'}
 				</span>
 			</a>
@@ -79,7 +91,7 @@
 
 <style>
 	h1 {
-		font-size: 1.4rem;
+		font-size: var(--fs-title);
 		margin: 0.4rem 0 0.2rem;
 	}
 
