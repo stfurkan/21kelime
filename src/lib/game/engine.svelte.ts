@@ -145,6 +145,10 @@ export class GameEngine {
 		this.deadline = null;
 		this.phase = 'playing';
 		if (!this.relax) this.startTimer();
+		// A round that begins while the tab or app is already hidden (the
+		// between-round timer fired in the background) would otherwise run its
+		// whole clock unseen. Start it paused; the return visit resumes it.
+		if (typeof document !== 'undefined' && document.hidden) this.pauseForBackground();
 	}
 
 	private startTimer(): void {

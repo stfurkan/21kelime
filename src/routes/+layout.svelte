@@ -234,8 +234,10 @@
 	   capped column above it would read as broken. */
 	@media (min-width: 700px) and (min-height: 950px) {
 		.app.web {
-			min-height: 0;
-			height: 880px;
+			/* A minimum, not a fixed height: pages taller than the box (the
+			   archive, the legal text) grow past it and sit at the top instead
+			   of being centred with an empty band above and overflow below. */
+			min-height: 880px;
 			/* app.css turns the body into a flex column here. A flex item with
 			   auto side margins is sized to its content, not stretched, so
 			   without this the column collapsed to the width of its longest

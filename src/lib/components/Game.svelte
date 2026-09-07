@@ -68,8 +68,9 @@
 			const startedRecently = puzzle.date === today || dayNumberOf(today) - puzzle.day === 1;
 			// Compact day -> score record. Full day states are pruned after 60
 			// days to cap storage; this one line per day is what keeps the
-			// archive showing an honest "played" mark years later.
-			recordHistory(puzzle.day, engine.score);
+			// archive showing an honest "played" mark years later. Practice
+			// games carry synthetic day numbers and would only pile up here.
+			if (persist) recordHistory(puzzle.day, engine.score);
 			if (mode === 'daily' && startedRecently) {
 				const state = loadDayState(puzzle.date);
 				if (state && !state.statsCounted) {
