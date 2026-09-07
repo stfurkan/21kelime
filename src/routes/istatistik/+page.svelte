@@ -5,7 +5,6 @@
 	import { remindersEnabled, setRemindersEnabled } from '$lib/native';
 
 	// Client-only data, read after mount so server HTML stays stable.
-	// eslint-disable-next-line svelte/prefer-writable-derived -- deliberate mount-time read of localStorage
 	let stats: Stats = $state({ ...EMPTY_STATS });
 	let reminderOn = $state(false);
 	let permissionDenied = $state(false);
@@ -56,7 +55,7 @@
 
 <style>
 	h1 {
-		font-size: 1.4rem;
+		font-size: var(--fs-title);
 		margin: 0.4rem 0 0.2rem;
 	}
 

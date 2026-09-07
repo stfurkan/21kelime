@@ -34,7 +34,7 @@
 	}
 
 	h1 {
-		font-size: 1.4rem;
+		font-size: var(--fs-title);
 		margin: 0.4rem 0 0.6rem;
 	}
 
